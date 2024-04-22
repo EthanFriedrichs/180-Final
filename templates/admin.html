@@ -21,6 +21,11 @@
                 </div>
                 <div class="shop-item-details2">
                     <p class="shop-item-info">{{product[6]}}</p>
+                    {% for user in users %}
+                        {% if user[0] == product[4] %}
+                            <p class="shop-item-info">Sold By: {{user[1]}}</p>
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>
