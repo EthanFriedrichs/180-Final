@@ -74,7 +74,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection string is in the format mysql://user:password@server/database
-conn_str = "mysql://root:ethanpoe125@localhost/customers_2"
+conn_str = "mysql://root:Just5fun!@localhost/customers_2"
 engine = create_engine(conn_str) # echo=True tells you if connection is successful or not
 db = engine.connect()
 
@@ -117,7 +117,7 @@ def register():
         
 
         #generate hash and store in database
-        hashed = generate_password_hash(password)
+        hashed = generate_password_hash(password + "SOIEFHBsefuionvhiouW")
         params = {"username":username, "username":username, "name":name, "email":email, "hashed":hashed, "account":account_type}
 
         
@@ -137,6 +137,7 @@ def login():
         #store login info
         email = request.form.get("email")
         password = request.form.get("password")
+        password = password + "SOIEFHBsefuionvhiouW"
         
         #check all info exists
         if not email or not password:
@@ -153,6 +154,7 @@ def login():
             users = db.execute(text("select * from users where username = :email"), params).all()
             for user in users:
                 if check_password_hash(user[4], password) and user[2] == email:
+                    session["account_num"] = user[0]
                     session["user_id"] = user[1]
                     session["username"] = user[2]
                     session["loggedIn"] = True
@@ -163,6 +165,7 @@ def login():
         
         else:
             # Sign the user in as their current username and make the session "loggedIn"
+            session["account_num"] = users[0][0]
             session["user_id"] = users[0][1]
             session["username"] = users[0][2]
             session["loggedIn"] = True
@@ -209,7 +212,10 @@ def admin_delete():
 
 # vendor routes
 @app.route("/vendor", methods=["GET", "POST"])
-
+def vendor():
+    params = {"account_num":session["account_num"]}
+    products = db.execute(text("select * from items where user_id = :account_num"),params).all()
+    return render_template("vendor.html", products=products)
 
 @app.route("/vendor/add", methods=["GET", "POST"])
 def add_item():
