@@ -20,11 +20,11 @@
                 </div>
                 <div class="colors">
                     <div class="mb-2">
-                        <input class="form-control mx-auto w-auto" name="color" placeholder="Color" type="text" required>
+                        <input class="side-input" name="color" placeholder="Color" type="text" required> <input class="side-input" name="size" placeholder="Size" type="text" required>
                     </div>
                 </div>
                 
-                <button id = "color" class="color-btn add-btn" type="button">Add New Color</button>
+                <button id = "color" class="color-btn add-btn" type="button">Add New Color Or Size</button>
                 <br>
                 <script type = "text/javascript">
                     document.getElementById("color").addEventListener("click", function(){
@@ -32,7 +32,7 @@
                         newRow.classList.add("mb-2");
                         var documentItem = document.getElementsByClassName("colors")[0];
                         var contents = `
-                        <input class="form-control mx-auto w-auto" name="color" placeholder="Color" type="text" required>
+                        <input class="side-input" name="color" placeholder="Color" type="text"> <input class="side-input" name="size" placeholder="Size" type="text">
                         `;
                         newRow.innerHTML = contents;
                         documentItem.append(newRow);
@@ -49,9 +49,6 @@
                     });
                 </script>
 
-                <div class="mb-3">
-                    <input class="form-control mx-auto w-auto" name="size" placeholder="Size" type="text" required>
-                </div>
                 <div class="mb-3">
                     <input class="form-control mx-auto w-auto" name="item_price" placeholder="Item Price" type="text" required>
                 </div>

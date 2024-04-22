@@ -145,6 +145,30 @@ color:black;
     margin-bottom: 10px;
 }
 
+.side-input {
+    width: 200px;
+    display: inline-block;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    appearance: none;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.side-input:hover {
+    box-shadow: 0 0 0 0.25rem rgba(197, 121, 14, 0.25);
+}
+
+.side-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(197, 121, 14, 0.25);
+}
+
 .add-btn {
     color: white;
     background-color: forestgreen;

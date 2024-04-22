@@ -219,11 +219,30 @@ def add_item():
         price = request.form.get("item_price")
         stock = request.form.get("curr_stock")
         warranty = request.form.get("warranty_length")
-        color = request.form.get("color")
-        print(name, desc, price, stock, warranty, color)
+        color = request.form.getlist("color")
+        size = request.form.getlist("size")
+        print(name, desc, price, stock, warranty, color, size)
         params = {"email":session["user_id"]}
         user = db.execute(text("select * from users where email = :email"), params).all()
         print(user[0][0]) # User ID
+
+        params = {"name":name, "price":price, "stock":stock, "user":user[0][0], "warranty":warranty, "desc":desc}
+        db.execute(text("insert into items (item_name, price, in_stock, user_id, warranty_length, descript) values (:name, :price, :stock, :user, :warranty, :desc)"), params)
+        db.commit()
+
+        curr_items = db.execute(text("select * from items")).all()
+        for i in range(len(color)):
+            curr_color = color[i]
+            curr_size = size[i]
+            if curr_color == "":
+                curr_color = "N/A"
+            if curr_size == "":
+                curr_size = "N/A"
+            print(curr_color, curr_size)
+            if (curr_color != "N/A") and (curr_size != "N/A"):
+                params = {"size":curr_size, "color":curr_color, "id":len(curr_items)}
+                db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :id)"), params)
+                db.commit()
 
         return render_template("add_item.html")
     else:
