@@ -74,7 +74,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection string is in the format mysql://user:password@server/database
-conn_str = "mysql://root:Just5fun!@localhost/customers_2"
+conn_str = "mysql://root:ethanpoe125@localhost/customers_2"
 engine = create_engine(conn_str) # echo=True tells you if connection is successful or not
 db = engine.connect()
 
@@ -227,10 +227,8 @@ def add_item():
         warranty = request.form.get("warranty_length")
         color = request.form.getlist("color")
         size = request.form.getlist("size")
-        print(name, desc, price, stock, warranty, color, size)
         params = {"email":session["user_id"]}
         user = db.execute(text("select * from users where email = :email"), params).all()
-        print(user[0][0]) # User ID
 
         params = {"name":name, "price":price, "stock":stock, "user":user[0][0], "warranty":warranty, "desc":desc}
         db.execute(text("insert into items (item_name, price, in_stock, user_id, warranty_length, descript) values (:name, :price, :stock, :user, :warranty, :desc)"), params)
@@ -244,7 +242,6 @@ def add_item():
                 curr_color = "N/A"
             if curr_size == "":
                 curr_size = "N/A"
-            print(curr_color, curr_size)
             if (curr_color != "N/A") and (curr_size != "N/A"):
                 params = {"size":curr_size, "color":curr_color, "id":len(curr_items)}
                 db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :id)"), params)
