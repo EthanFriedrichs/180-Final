@@ -24,8 +24,8 @@
                     </div>
                 </div>
                 
-                <button id = "color" class="btn btn-primary color-btn" type="button">Add New Color</button>
-                <br><br>
+                <button id = "color" class="color-btn add-btn" type="button">Add New Color</button>
+                <br>
                 <script type = "text/javascript">
                     document.getElementById("color").addEventListener("click", function(){
                         var newRow = document.createElement("div");
@@ -39,13 +39,14 @@
                     });
                 </script>
 
-                <button id = "remove" class="btn btn-primary color-btn" type="button">REMOVE</button>
-                <br><br>
+                <button id = "remove" class="color-btn remove-btn" type="button">REMOVE</button>
+                <br>
                 <script type = "text/javascript">
-                    const elements = document.getElementsByClassName("");
-                    while(elements.length > 0){
-                        elements[0].parentNode.removeChild(elements[0]);
-                    }
+                    document.getElementById("remove").addEventListener("click", function(){
+                        const elements = document.getElementsByClassName("mb-2");
+                        if (elements.length > 1)
+                            elements[elements.length - 1].parentNode.removeChild(elements[elements.length - 1]);
+                    });
                 </script>
 
                 <div class="mb-3">
