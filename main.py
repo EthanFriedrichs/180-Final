@@ -229,23 +229,29 @@ def add_item():
         size = request.form.getlist("size")
         params = {"email":session["user_id"]}
         user = db.execute(text("select * from users where email = :email"), params).all()
+        params = {"user":user[0][0], "name":name}
+        item_check = db.execute(text("select * from items where user_id = :user and item_name = :name"), params).all()
+        
+        if len(item_check) < 1:
 
-        params = {"name":name, "price":price, "stock":stock, "user":user[0][0], "warranty":warranty, "desc":desc}
-        db.execute(text("insert into items (item_name, price, in_stock, user_id, warranty_length, descript) values (:name, :price, :stock, :user, :warranty, :desc)"), params)
-        db.commit()
+            params = {"name":name, "price":price, "stock":stock, "user":user[0][0], "warranty":warranty, "desc":desc}
+            db.execute(text("insert into items (item_name, price, in_stock, user_id, warranty_length, descript) values (:name, :price, :stock, :user, :warranty, :desc)"), params)
+            db.commit()
 
-        curr_items = db.execute(text("select * from items")).all()
-        for i in range(len(color)):
-            curr_color = color[i]
-            curr_size = size[i]
-            if curr_color == "":
-                curr_color = "N/A"
-            if curr_size == "":
-                curr_size = "N/A"
-            if (curr_color != "N/A") and (curr_size != "N/A"):
-                params = {"size":curr_size, "color":curr_color, "id":len(curr_items)}
-                db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :id)"), params)
-                db.commit()
+            curr_items = db.execute(text("select * from items")).all()
+            for i in range(len(color)):
+                curr_color = color[i]
+                curr_size = size[i]
+                if curr_color == "":
+                    curr_color = "N/A"
+                if curr_size == "":
+                    curr_size = "N/A"
+                if (curr_color != "N/A") and (curr_size != "N/A"):
+                    params = {"size":curr_size, "color":curr_color, "id":len(curr_items)}
+                    db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :id)"), params)
+                    db.commit()
+        else:
+            return apology("Item already exists")
 
         return render_template("add_item.html")
     else:
