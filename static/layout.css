@@ -161,10 +161,6 @@ color:black;
     transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
-.side-input:hover {
-    box-shadow: 0 0 0 0.25rem rgba(197, 121, 14, 0.25);
-}
-
 .side-input:focus {
     box-shadow: 0 0 0 0.25rem rgba(197, 121, 14, 0.25);
 }
@@ -211,4 +207,28 @@ color:black;
 .remove-btn:active {
     background-color: red;
     box-shadow: 0 0 0 0.25rem rgba(255, 63, 63, 0.433);
+}
+
+.container {
+    background-color: rgba(173, 216, 230, 0.7);
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 50%;
+    margin-right: 50%;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.edit-div {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.p-center {
+    align-self: center;
+    margin-right: 20px;
+    width: 200px;
+    text-align: center;
 }
