@@ -19,7 +19,7 @@ insert into items (item_name, price, in_stock, user_id, warranty_length, descrip
 drop tables describer;
 create table describer (color_id int primary key auto_increment, size varchar(255), color varchar(255), item_id int,
 foreign key (item_id) references items(item_id));
-insert into describer (size, color, item_id) values ("Beeeeeg", "Orange", 4);
+insert into describer (size, color, item_id) values ("Other", "N/A", 3);
 select * from describer;
 
 drop table images;
