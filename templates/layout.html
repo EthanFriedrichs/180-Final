@@ -66,9 +66,9 @@
               </div>
             {% else %}
               <div class="formSection barItem">
-                <div class="barItem input" style="margin-left:10px;">
-                  <p>{{session["username"]}}</p>
-                </div>
+                <button class="barItem input" style="margin-left:10px;">
+                  <a href="/my_account">{{session["username"]}}</a>
+                </button>
                 <button class="barItem input" style="margin-left:10px;">
                     <a href="/logout">LOGOUT</a>
                 </button>

@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+
+{% block title %}
+    View Items
+{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="../static/view.css">
+
+<section class="container content-section">
+    <div style="display:flex; justify-content: center; margin-top:70px;">
+        <div>
+            <h1>Your information:</h1>
+            <h2>Email: {{info[1]}}</h2>
+            <h2>Username: {{info[2]}}</h2>
+            <h2>Name: {{info[3]}}</h2>
+            <h2>Account Type: {{info[5]}}</h2>
+
+        </div>
+    </div>
+    
+</section>
+{% endblock %}
