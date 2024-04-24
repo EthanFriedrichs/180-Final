@@ -7,8 +7,10 @@
     margin: 0 auto;
     margin-top: 10px;
     padding: 0 1.5em;
-    background-color: rgb(26, 160, 162);
+    background-color: rgba(173, 216, 230, .7);
     border-radius: 100px;
+    margin-top: 5%;
+
 }
 
 .shop-items-0 {
@@ -46,3 +48,48 @@
     color: #333;
     font-size: xx-large;
 }
+
+.delete-button:hover {
+    box-shadow: 0 0 30px black;
+    animation: pulsate 1s ease-out infinite;
+}
+
+@keyframes pulsate {
+    0% {
+        box-shadow: 0 0 0 red;
+    }
+
+    25% {
+        box-shadow: 0 0 15px red;
+    }
+
+    50% {
+        box-shadow: 0 0 30px red;
+    }
+
+    75% {
+        box-shadow: 0 0 15px red;
+    }
+
+    100% {
+        box-shadow: 0 0 0 red;
+    }
+}
+
+
+.navbar {
+    overflow: hidden;
+    background-color: #333;
+    position: fixed;
+    top: 8%;
+    bottom: 100%;
+    left: 0; 
+    width: 15%; 
+    height: 75%;
+    z-index: 1;
+  }
+  
+  .center_inputs{
+    margin: auto;
+    display: block;
+  }
