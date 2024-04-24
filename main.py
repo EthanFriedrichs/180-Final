@@ -298,6 +298,7 @@ def add_item():
     else:
         return render_template("add_item.html")
     
+
 @app.route("/vendor/delete", methods=["GET", "POST"])
 def vendor_delete():
     if request.method == "POST":
@@ -313,6 +314,71 @@ def vendor_delete():
         params = {"user_id":session["account_num"]}
         products = db.execute(text("select * from items where user_id = :user_id order by user_id"), params).all()
         return render_template("vendor_delete.html", products=products)
+
+# Display all attributes of the item
+# Add button to save the edits
+# Add the correct amounts of inputs for size and color
+    
+@app.route("/vendor/edit", methods=["GET", "POST"])
+def edit_vendor_item():
+    if request.method == "POST":
+        params = {"account_num":session["account_num"]}
+        items = db.execute(text("select * from items where user_id = :account_num"),params).all()
+
+        name = request.form.get("new_name")
+        price = request.form.get("new_price")
+        stock = request.form.get("new_stock")
+        warranty = request.form.get("new_warranty")
+        desc = request.form.get("new_desc")
+        
+        if (name != "" and items[0][1] != name):
+            params = {"new_name":name, "name":items[0][1], "account_num":session["account_num"]}
+            db.execute(text("update items set item_name = :new_name where item_name = :name and user_id = :account_num"), params)
+            db.commit()
+        
+        if (price != "" and items[0][2] != price):
+            params = {"new_price":price, "name":items[0][1], "account_num":session["account_num"]}
+            db.execute(text("update items set price = :new_price where item_name = :name and user_id = :account_num"), params)
+            db.commit()
+
+        if (stock != "" and items[0][3] != price):
+            params = {"new_stock":stock, "name":items[0][1], "account_num":session["account_num"]}
+            db.execute(text("update items set in_stock = :new_stock where item_name = :name and user_id = :account_num"), params)
+            db.commit()
+
+        if (warranty != "" and items[0][5] != warranty):
+            params = {"new_warranty":warranty, "name":items[0][1], "account_num":session["account_num"]}
+            db.execute(text("update items set warranty_length = :new_warranty where item_name = :name and user_id = :account_num"), params)
+            db.commit()
+
+        if (desc != "" and items[0][6] != desc):
+            params = {"new_desc":desc, "name":items[0][1], "account_num":session["account_num"]}
+            db.execute(text("update items set descript = :new_desc where item_name = :name and user_id = :account_num"), params)
+            db.commit()
+
+        size = request.form.getlist("new_size")
+        color = request.form.getlist("new_color")
+
+        for i in range(len(request.form.getlist("hidden_id"))):
+            if (size[i] != ""):
+                params = {"size":size[i], "id":request.form.getlist("hidden_id")[i]}
+                db.execute(text("update describer set size = :size where color_id = :id"), params)
+                db.commit()
+            if (color[i] != ""):
+                params = {"color":color[i], "id":request.form.getlist("hidden_id")[i]}
+                db.execute(text("update describer set color = :color where color_id = :id"), params)
+                db.commit()
+
+        params = {"account_num":session["account_num"]}
+        items = db.execute(text("select * from items where user_id = :account_num"),params).all()
+        describers = db.execute(text("select * from describer")).all()
+        return render_template("edit_item.html", items=items, describers=describers)
+    else:
+        params = {"account_num":session["account_num"]}
+        items = db.execute(text("select * from items where user_id = :account_num"),params).all()
+        describers = db.execute(text("select * from describer")).all()
+        return render_template("edit_item.html", items=items, describers=describers)
+
 
 
 def apology(message, code=400):
