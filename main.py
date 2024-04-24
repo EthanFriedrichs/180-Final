@@ -80,6 +80,7 @@ db = engine.connect()
 
 
 @app.route("/")
+@login_required
 def main_page():
     return render_template("index.html")
 
@@ -180,8 +181,17 @@ def logout():
     session.clear()
     return render_template("index.html")
 
+@app.route("/my_account", methods=["Get", "POST"])
+@login_required
+def my_account():
+    user_id = session["account_num"]
+    params = {"user_id":user_id}
+    info = db.execute(text("select * from users where user_id = :user_id"), params).all()
+    return render_template("account.html", info=info[0])
+
 # admin routes
 @app.route("/view", methods=["GET", "POST"])
+@login_required
 def view():
     if request.method == "POST":
         name = request.form.get("name")
@@ -219,6 +229,8 @@ def view():
         return render_template("view.html", products=products, users=users)
 
 @app.route("/admin/add", methods=["GET", "POST"])
+@login_required
+@admin_page
 def admin_add():
     if request.method == "POST":
         return apology("TO DO")
@@ -226,6 +238,8 @@ def admin_add():
         return apology("TO DO")
 
 @app.route("/admin/edit", methods=["GET", "POST"])
+@login_required
+@admin_page
 def admin_edit():
     if request.method == "POST":
         return apology("TO DO")
@@ -233,6 +247,8 @@ def admin_edit():
         return apology("TO DO")
 
 @app.route("/admin/delete", methods=["GET", "POST"])
+@login_required
+@admin_page
 def admin_delete():
     if request.method == "POST":
         product = request.form.get("product_id")
@@ -253,12 +269,16 @@ def admin_delete():
 
 # vendor routes
 @app.route("/vendor", methods=["GET", "POST"])
+@login_required
+@vendor_page
 def vendor():
     params = {"account_num":session["account_num"]}
     products = db.execute(text("select * from items where user_id = :account_num"),params).all()
     return render_template("vendor.html", products=products)
 
 @app.route("/vendor/add", methods=["GET", "POST"])
+@login_required
+@vendor_page
 def add_item():
     if request.method == "POST":
         name = request.form.get("item_name")
@@ -300,6 +320,8 @@ def add_item():
     
 
 @app.route("/vendor/delete", methods=["GET", "POST"])
+@login_required
+@vendor_page
 def vendor_delete():
     if request.method == "POST":
         product = request.form.get("product_id")
@@ -320,6 +342,8 @@ def vendor_delete():
 # Add the correct amounts of inputs for size and color
     
 @app.route("/vendor/edit", methods=["GET", "POST"])
+@login_required
+@vendor_page
 def edit_vendor_item():
     if request.method == "POST":
         params = {"account_num":session["account_num"]}
