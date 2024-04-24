@@ -21,10 +21,15 @@
                 <img src="../static/bulby.png" alt="light bulb logo" class="logo" style="padding-bottom: 10px;">
               </a>
                 <div class="formSection barItem">
+                  {% if session["loggedIn"] %}
+                  <button class="barItem input" style="margin-left:10px;">
+                    <a href="/view">View Items</a>
+                  </button>
+                  {% endif %}
                   
                   {% if session["account_type"] == "Admin" %}
                   <button class="barItem input" style="margin-left:10px;">
-                    <a href="/admin">View Items</a>
+                    <a href="/admin/delete">Delete Items</a>
                   </button>
                   {% endif %}
 
@@ -33,7 +38,10 @@
                     <a href="/vendor">View Items</a>
                   </button>
                   <button class="barItem input" style="margin-left:10px;">
-                    <a href="/vendor/add">Add Item</a>
+                    <a href="/vendor/add">Add Items</a>
+                  </button>
+                  <button class="barItem input" style="margin-left:10px;">
+                    <a href="/vendor/delete">Delete Items</a>
                   </button>
                   <button class="barItem input" style="margin-left:10px;">
                     <a href="/vendor/edit">Edit Items</a>

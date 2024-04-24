@@ -19,6 +19,10 @@ display:flex;
 justify-content: space-between;
 align-items:center;
 padding: 10px;
+position: fixed;
+top: 0;
+width: 100%;
+height: 8%;
 }
 
 .formSection {

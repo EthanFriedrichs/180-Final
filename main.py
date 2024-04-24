@@ -74,7 +74,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection string is in the format mysql://user:password@server/database
-conn_str = "mysql://root:ethanpoe125@localhost/customers_2"
+conn_str = "mysql://root:Just5fun!@localhost/customers_2"
 engine = create_engine(conn_str) # echo=True tells you if connection is successful or not
 db = engine.connect()
 
@@ -181,11 +181,42 @@ def logout():
     return render_template("index.html")
 
 # admin routes
-@app.route("/admin", methods=["GET", "POST"])
-def admin():
-    products = db.execute(text("select * from items")).all()
-    users = db.execute(text("select user_id, username from users")).all()
-    return render_template("admin.html", products=products, users=users)
+@app.route("/view", methods=["GET", "POST"])
+def view():
+    if request.method == "POST":
+        name = request.form.get("name")
+        description = request.form.get("description")
+        vendor = request.form.get("vendor")
+        if name:
+            name = "%" + name + "%"
+        else:
+            name = "%"
+        if description:
+            description = "%" + description + "%"
+        else:
+            description = "%"
+        if vendor:
+            vendor = "%" + vendor + "%"
+        else:
+            vendor = "%"
+
+
+        params = {"name":name, "description":description, "vendor":vendor}
+        users = db.execute(text("select user_id from users where username like :vendor and user_type = 'Vendor'"), params).all()
+        final_products = []
+        #iterate over users, grab all their products and filter by other values as well
+        for user in users:
+            params = {"name":name, "description":description, "vendor":vendor, "user_id":user[0]}
+            products = db.execute(text("select * from items where user_id = :user_id and item_name like :name and descript like :description order by user_id"), params).all()
+            if products:
+                for product in products:
+                    final_products.append(product)
+        users = db.execute(text("select user_id, username from users")).all()
+        return render_template("view.html", products=final_products, users=users)
+    else:
+        products = db.execute(text("select * from items order by user_id")).all()
+        users = db.execute(text("select user_id, username from users")).all()
+        return render_template("view.html", products=products, users=users)
 
 @app.route("/admin/add", methods=["GET", "POST"])
 def admin_add():
@@ -204,9 +235,19 @@ def admin_edit():
 @app.route("/admin/delete", methods=["GET", "POST"])
 def admin_delete():
     if request.method == "POST":
-        return apology("TO DO")
+        product = request.form.get("product_id")
+        params = {"product_id":product}
+        db.execute(text("delete from items where item_id = :product_id"), params)
+        db.commit()
+
+        products = db.execute(text("select * from items order by user_id")).all()
+        users = db.execute(text("select user_id, username from users")).all()
+        return render_template("admin_delete.html", products=products, users=users)
+    
     else:
-        return apology("TO DO")
+        products = db.execute(text("select * from items order by user_id")).all()
+        users = db.execute(text("select user_id, username from users")).all()
+        return render_template("admin_delete.html", products=products, users=users)
 
 
 
@@ -257,6 +298,23 @@ def add_item():
     else:
         return render_template("add_item.html")
     
+
+@app.route("/vendor/delete", methods=["GET", "POST"])
+def vendor_delete():
+    if request.method == "POST":
+        product = request.form.get("product_id")
+        params = {"product_id":product, "user_id":session["account_num"]}
+        db.execute(text("delete from items where item_id = :product_id"), params)
+        db.commit()
+
+        products = db.execute(text("select * from items where user_id = :user_id order by user_id"), params).all()
+        return render_template("vendor_delete.html", products=products)
+    
+    else:
+        params = {"user_id":session["account_num"]}
+        products = db.execute(text("select * from items where user_id = :user_id order by user_id"), params).all()
+        return render_template("vendor_delete.html", products=products)
+
 # Display all attributes of the item
 # Add button to save the edits
 # Add the correct amounts of inputs for size and color
@@ -320,6 +378,7 @@ def edit_vendor_item():
         items = db.execute(text("select * from items where user_id = :account_num"),params).all()
         describers = db.execute(text("select * from describer")).all()
         return render_template("edit_item.html", items=items, describers=describers)
+
 
 
 def apology(message, code=400):
