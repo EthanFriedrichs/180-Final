@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+
+{% block title %}
+    View Items
+{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="../static/view.css">
+
+<section class="container content-section">
+
+    {% for product in products %}
+        <div class="shop-items-0">
+            <!-- add items here with jinja -->
+            <div class="shop-item">
+                <span class="shop-item-title">{{product[1]}}</span>
+                <!-- <img class="shop-item-image">  NEED IMAGES TABLE FIRST--> 
+                <div class="shop-item-details">
+                    <span class="shop-item-price">{{"${:,.2f}".format(product[2])}}</span>
+                </div>
+                <div class="shop-item-details2">
+                    <p class="shop-item-info">{{product[6]}}</p>
+                    <form action="/admin/delete" method="post">
+                        <input type="hidden" name="product_id" value="{{product[0]}}">
+                        <button class="btn btn-danger delete-button" type="Submit">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</section>
+{% endblock %}

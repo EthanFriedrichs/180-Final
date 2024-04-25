@@ -21,6 +21,15 @@
                 </div>
                 <div class="shop-item-details2">
                     <p class="shop-item-info">{{product[6]}}</p>
+                    {% for user in users %}
+                        {% if user[0] == product[4] %}
+                            <p class="shop-item-info">Sold By: {{user[1]}}</p>
+                        {% endif %}
+                    {% endfor %}
+                    <form action="/admin/delete" method="post">
+                        <input type="hidden" name="product_id" value="{{product[0]}}">
+                        <button class="btn btn-danger delete-button" type="Submit">Delete</button>
+                    </form>
                 </div>
             </div>
         </div>
