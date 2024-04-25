@@ -71,6 +71,7 @@
     {%endfor%}
 
     <script type = "text/javascript">
+        // Makes the "Add New Color Or Size" button add 2 more inputs for color and size
         elements = document.getElementsByClassName("add-btn");
         for (let i = 0; i < elements.length; i++) {
             elements[i].addEventListener("click", function(){
@@ -97,6 +98,7 @@
     </script>
 
     <script type = "text/javascript">
+            // Iterates through each button and then edits the inputs based on what one was clicked (CURRENTLY BROKEN!!!)
             buttons = document.getElementsByClassName("remove-btn");
             var offset = 0;
             for (let i = 0; i < buttons.length; i++) {
