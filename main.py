@@ -74,7 +74,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection string is in the format mysql://user:password@server/database
-conn_str = "mysql://root:Just5fun!@localhost/customers_2"
+conn_str = "mysql://root:ethanpoe125@localhost/customers_2"
 engine = create_engine(conn_str) # echo=True tells you if connection is successful or not
 db = engine.connect()
 
@@ -382,15 +382,31 @@ def edit_vendor_item():
 
         size = request.form.getlist("new_size")
         color = request.form.getlist("new_color")
+        hidden_item_id = request.form.get("item_hidden_id")
+        hidden_id = request.form.getlist("hidden_id")
+        removals = request.form.getlist("removal")
+        print(hidden_id, removals)
 
         for i in range(len(request.form.getlist("hidden_id"))):
-            if (size[i] != ""):
+            if (size[i] != "" and request.form.getlist("hidden_id")[i] != "none"):
                 params = {"size":size[i], "id":request.form.getlist("hidden_id")[i]}
                 db.execute(text("update describer set size = :size where color_id = :id"), params)
                 db.commit()
-            if (color[i] != ""):
+            if (color[i] != ""  and request.form.getlist("hidden_id")[i] != "none"):
                 params = {"color":color[i], "id":request.form.getlist("hidden_id")[i]}
                 db.execute(text("update describer set color = :color where color_id = :id"), params)
+                db.commit()
+            if (color[i] != "" and size[i] == "" and request.form.getlist("hidden_id")[i] == "none"):
+                params = {"size":"N/A", "color":color[i], "id":hidden_item_id}
+                db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :id);"), params)
+                db.commit()
+            if (color[i] == "" and size[i] != "" and request.form.getlist("hidden_id")[i] == "none"):
+                params = {"size":size[i], "color":"N/A", "id":hidden_item_id}
+                db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :id);"), params)
+                db.commit()
+            if (color[i] != "" and size[i] != "" and request.form.getlist("hidden_id")[i] == "none"):
+                params = {"size":size[i], "color":color[i], "id":hidden_item_id}
+                db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :id);"), params)
                 db.commit()
 
         params = {"account_num":session["account_num"]}

@@ -213,6 +213,28 @@ color:black;
     box-shadow: 0 0 0 0.25rem rgba(255, 63, 63, 0.433);
 }
 
+.final-btn {
+    color: white;
+    background-color: blue;
+    border: 1px solid transparent;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    border-radius: .25rem;
+    display: inline-block;
+    font-weight: 400;
+    line-height: 1.5;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.final-btn:hover {
+    box-shadow: 0 0 0 0.25rem rgba(37, 111, 250, 0.75);
+}
+
+.final-btn:active {
+    background-color: rgb(86, 145, 255);
+    box-shadow: 0 0 0 0.25rem rgba(100, 149, 237, 0.50);
+}
+
 .container {
     background-color: rgba(173, 216, 230, 0.7);
     border-radius: 5px;
