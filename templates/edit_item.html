@@ -9,6 +9,7 @@
     {%for i in items%}
         <div class = "container">
             <form action="/vendor/edit" method="post">
+                <input class="form-control mx-auto w-auto" name="item_hidden_id" value="{{i[0]}}" type="hidden">
                 <div class = "edit-div">
                     <p class = "p-center">{{i[1]}}</p>
                     <div class="mb-3">
@@ -41,7 +42,7 @@
                 </div>
                 {%for v in describers%}
                     {%if v[3] == i[0]%}
-                        <div class = "edit-div">
+                        <div class = "edit-div describers-div">
                             <div>
                                 <p class = "p-center">Size: {{v[1]}}</p>
                                 <p class = "p-center">Color: {{v[2]}}</p>
@@ -49,14 +50,78 @@
                             <div class="mb-3">
                                 <input class="form-control mx-auto w-auto" name="new_size" placeholder="New size" type="text"><input class="form-control mx-auto w-auto" name="new_color" placeholder="New color" type="text">
                                 <input class="form-control mx-auto w-auto" name="hidden_id" value="{{v[0]}}" type="hidden">
+                                <input class="form-control mx-auto w-auto" name="removal" value="no" type="hidden">
                             </div>
+                            <br>
+                            <button class="color-btn remove-btn" style="margin-left: 10px;" type="button">X</button>
+                            <br>
                         </div>
                     {%endif%}
                 {%endfor%}
+                <div class="colors"></div>
+                
                 <div class = "edit-div">
-                    <button id = "color" class="color-btn add-btn" type="submit">Save Changes</button>
+                    <button class="color-btn add-btn" style="margin-right: 10px;" type="button">Add New Color Or Size</button>
+                </div>
+                <div class = "edit-div">
+                    <button id = "color" class="color-btn final-btn" type="submit">Save Changes</button>
                 </div>
             </form>
         </div>
     {%endfor%}
+
+    <script type = "text/javascript">
+        elements = document.getElementsByClassName("add-btn");
+        for (let i = 0; i < elements.length; i++) {
+            elements[i].addEventListener("click", function(){
+                var newRow = document.createElement("div");
+                newRow.classList.add("edit-div");
+                var documentItem = document.getElementsByClassName("colors")[i];
+                var contents = `
+                <div>
+                    <p class = "p-center">Size: N/A</p>
+                    <p class = "p-center">Color: N/A</p>
+                </div>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="new_size" placeholder="New size" type="text"><input class="form-control mx-auto w-auto" name="new_color" placeholder="New color" type="text">
+                    <input class="form-control mx-auto w-auto" name="hidden_id" value="none" type="hidden">
+                </div>
+                <br>
+                <button class="color-btn remove-btn" style="margin-left: 10px;" type="button">X</button>
+                <br>
+                `;
+                newRow.innerHTML = contents;
+                documentItem.append(newRow);
+            })
+        };
+    </script>
+
+    <script type = "text/javascript">
+            buttons = document.getElementsByClassName("remove-btn");
+            var offset = 0;
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].addEventListener("click", function(){
+                const form = document.getElementsByTagName("form");
+                var elements = form[i].getElementsByClassName("describers-div");
+                if (elements.length > 0) {
+                    textbox = elements[i - 1].getElementsByTagName("input")
+                    if (textbox[3].value == "yes") {
+                        textbox[3].setAttribute("value", "no");
+                        textbox[0].style.border = "1px solid transparent"
+                        textbox[0].setAttribute('placeholder', "New size")
+                        textbox[1].style.border = "1px solid transparent"
+                        textbox[1].setAttribute('placeholder', "New color")
+                    }
+                    else {
+                        textbox[3].setAttribute("value", "yes");
+                        textbox[0].style.border = "1px solid red"
+                        textbox[0].setAttribute('placeholder', "!! Being removed !!")
+                        textbox[1].style.border = "1px solid red"
+                        textbox[1].setAttribute('placeholder', "!! Being removed !!")
+                    }
+            
+                }
+            })
+        };
+    </script>
 {% endblock %}
