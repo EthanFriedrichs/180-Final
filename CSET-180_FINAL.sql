@@ -32,6 +32,9 @@ create table cart (cart_id int primary key auto_increment, user_id int, item_id 
 foreign key (user_id) references users(user_id),
 foreign key (item_id) references items(item_id));
 select * from cart;
+insert into cart (user_id, item_id, quantity) values (3, 4, 2), (3, 2, 12);
+select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id);
+-- items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username
 
 drop table complaints;
 create table complaints (complaint_id int primary key auto_increment, item_id int, time_date date not null, title varchar(20) not null, item_desc varchar(255) not null, demand varchar(14) not null, image_url varchar(255),
@@ -45,9 +48,16 @@ foreign key (user_id) references users(user_id));
 select * from reviews;
 
 drop table orders;
-create table orders (order_id int primary key auto_increment, date_ordered datetime not null, item_id int not null, price int not null, user_id int, order_status varchar(10) not null,
+create table orders (order_id int primary key auto_increment, date_ordered datetime not null, user_id int, order_status varchar(10) not null,
 foreign key (user_id) references users(user_id));
 select * from orders;
+
+select orders.order_id, date_ordered, orders.user_id, order_status, ordered_item_id, price, quantity, item_name from orders join order_items on (orders.order_id = order_items.order_id) where user_id = 3;
+
+drop table order_items;
+create table order_items (ordered_item_id int primary key auto_increment, order_id int, price float, quantity int, item_name varchar(255),
+foreign key (order_id) references orders(order_id));
+select * from order_items;
 
 drop table discounts;
 create table discounts (discount_id int primary key auto_increment, discount_expire date not null, discount_percent int not null, item_id int,

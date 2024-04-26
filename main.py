@@ -3,6 +3,7 @@ from flask_session import Session
 from sqlalchemy import create_engine, text
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
+from datetime import datetime
 
 def login_required(
     f,
@@ -419,7 +420,49 @@ def edit_vendor_item():
         describers = db.execute(text("select * from describer")).all()
         return render_template("edit_item.html", items=items, describers=describers)
 
-
+@app.route("/customer/cart", methods=["GET", "POST"])
+@login_required
+def cart():
+    if request.method == "POST":
+        date_ordered = datetime.now()
+        params = {"id":session["account_num"]}
+        current_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) where cart.user_id = :id;"), params).all()
+        # Adds to order and then removes the cart items via their cart_id
+        params = {"date_ordered":date_ordered, "id":session["account_num"], "status":"Pending"}
+        db.execute(text("insert into orders (date_ordered, user_id, order_status) values (:date_ordered, :id, :status)"), params)
+        db.commit()
+        for i in range(len(current_info)):
+            params = {"id":session["account_num"]}
+            order_id = db.execute(text("select * from orders where user_id = :id order by order_id desc;"), params).all()
+            params = {"id":order_id[0][0], "price":current_info[i][2], "quantity":current_info[i][6], "name":current_info[i][1]}
+            db.execute(text("insert into order_items (order_id, price, quantity, item_name) values (:id, :price, :quantity, :name)"), params)
+            db.commit()
+            params = {"id":current_info[i][4]}
+            # db.execute(text("delete from cart where cart_id = :id"), params)
+            # db.commit()
+        return redirect("/customer/order")
+    else:
+        params = {"id":session["account_num"]}
+        cart_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) where cart.user_id = :id;"), params).all()
+        return render_template("cart.html", cart_info=cart_info)
+    
+@app.route("/customer/order")
+@login_required
+def orders():
+    params = {"id":session["account_num"]}
+    orders = db.execute(text("select * from orders where user_id = :id"), params).all()
+    params = {"id":session["account_num"]}
+    order_info = db.execute(text("select * from orders join order_items on (orders.order_id = order_items.order_id) where user_id = :id"), params).all()
+    totals = []
+    for i in range(len(orders)):
+        added = 0
+        for v in order_info:
+            if v[0] == i + 1:
+                print(v)
+                added += v[6] * v[7]
+        totals.append(added)
+                
+    return render_template("order.html", orders=orders, order_info=order_info, totals=totals)
 
 def apology(message, code=400):
     def escape(s):
