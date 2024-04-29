@@ -17,7 +17,36 @@
             <br>
             <input class="form-control" name="vendor" placeholder="Vendor Name" type="text">
             <br>
+            <button class="btn btn-primary center_inputs" type="submit">Search</button>
+            <br>
+            <div style="text-align: right;" class="form-control">
+                <label>Category:</label>
+                    <select name="category">
+                        <option selected value="%">N/A</option>
+                        {% for category in categories %}
+                            <option value="{{category[0]}}">{{category[0]}}</option>
+                        {% endfor %}
+                    </select>
+                <br>
+                <label>Size:</label>
+                    <select name="size">
+                        <option selected value="%">N/A</option>
+                        {% for size in sizes %}
+                            <option value="{{size[0]}}">{{size[0]}}</option>
+                        {% endfor %}
+                    </select>
+                <br>
+                <label>Color:</label>
+                    <select name="color">
+                        <option selected value="%">N/A</option>
+                        {% for color in colors %}
+                            <option value="{{color[0]}}">{{color[0]}}</option>
+                        {% endfor %}
+                    </select>
+            </div>
+            <br>
             <button class="btn btn-primary center_inputs" type="submit">Filter</button>
+
         </form>
     </div>
 
@@ -37,6 +66,10 @@
                             <p class="shop-item-info">Sold By: {{user[1]}}</p>
                         {% endif %}
                     {% endfor %}
+                    <form action="/item/{{product[0]}}" method="get">
+                        <input type="hidden" name="item_id" value="{{product[0]}}">
+                        <button class="btn btn-primary" type="submit">View Item</button>
+                    </form>
                 </div>
             </div>
         </div>

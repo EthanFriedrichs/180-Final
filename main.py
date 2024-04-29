@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, url_for
 from flask_session import Session
 from sqlalchemy import create_engine, text
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -74,7 +74,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection string is in the format mysql://user:password@server/database
-conn_str = "mysql://root:ethanpoe125@localhost/customers_2"
+conn_str = "mysql://root:Just5fun!@localhost/customers_2"
 engine = create_engine(conn_str) # echo=True tells you if connection is successful or not
 db = engine.connect()
 
@@ -197,6 +197,10 @@ def view():
         name = request.form.get("name")
         description = request.form.get("description")
         vendor = request.form.get("vendor")
+        color = request.form.get("color")
+        size = request.form.get("size")
+        category = request.form.get("category")
+
         if name:
             name = "%" + name + "%"
         else:
@@ -216,17 +220,39 @@ def view():
         final_products = []
         #iterate over users, grab all their products and filter by other values as well
         for user in users:
-            params = {"name":name, "description":description, "vendor":vendor, "user_id":user[0]}
-            products = db.execute(text("select * from items where user_id = :user_id and item_name like :name and descript like :description order by user_id"), params).all()
+            params = {"name":name, "description":description, "vendor":vendor, "user_id":user[0], "color":color, "size":size, "category":category}
+            products = db.execute(text("select * from items where user_id = :user_id and item_name like :name and descript like :description and item_id in (select item_id from describer where color like :color) and item_id in (select item_id from describer where size like :size) and item_id in (select item_id from describer where category like :category) order by user_id"), params).all()
             if products:
                 for product in products:
+                    print(product)
                     final_products.append(product)
+        
         users = db.execute(text("select user_id, username from users")).all()
-        return render_template("view.html", products=final_products, users=users)
+        colors = db.execute(text("select distinct color from describer where color != 'N/A'")).all()
+        sizes = db.execute(text("select distinct size from describer where size != 'N/A'")).all()
+        categories = db.execute(text("select distinct category from describer where category != 'N/A'")).all()
+        return render_template("view.html", products=products, users=users, colors=colors, sizes=sizes, categories=categories)
     else:
         products = db.execute(text("select * from items order by user_id")).all()
         users = db.execute(text("select user_id, username from users")).all()
-        return render_template("view.html", products=products, users=users)
+        colors = db.execute(text("select distinct color from describer where color != 'N/A'")).all()
+        sizes = db.execute(text("select distinct size from describer where size != 'N/A'")).all()
+        categories = db.execute(text("select distinct category from describer where category != 'N/A'")).all()
+        return render_template("view.html", products=products, users=users, colors=colors, sizes=sizes, categories=categories)
+    
+
+@app.route("/item/<item_id>", methods=["GET", "POST"])
+@login_required
+@customer_page
+def item_page(item_id):
+    if request.method == "POST":
+        return apology("TODO")
+    
+    else:
+        params = {"item_id":item_id}
+        product = db.execute(text("select * from items where item_id = :item_id"), params).all()
+        return render_template("view_item.html", product=product[0])
+
 
 @app.route("/admin/add", methods=["GET", "POST"])
 @login_required
@@ -418,6 +444,7 @@ def edit_vendor_item():
         items = db.execute(text("select * from items where user_id = :account_num"),params).all()
         describers = db.execute(text("select * from describer")).all()
         return render_template("edit_item.html", items=items, describers=describers)
+
 
 
 
