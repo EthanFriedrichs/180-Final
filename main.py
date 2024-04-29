@@ -75,7 +75,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection string is in the format mysql://user:password@server/database
-conn_str = "mysql://root:ethanpoe125@localhost/customers_2"
+conn_str = "mysql://root:Just5fun!@localhost/customers_2"
 engine = create_engine(conn_str) # echo=True tells you if connection is successful or not
 db = engine.connect()
 
@@ -249,7 +249,13 @@ def item_page(item_id):
         else:
             db.execute(text("insert into cart (user_id, item_id, quantity) values (:user_id, :item_id, 1)"), params)
             db.commit()
-        return apology("TODO")
+
+        products = db.execute(text("select * from items order by user_id")).all()
+        users = db.execute(text("select user_id, username from users")).all()
+        colors = db.execute(text("select distinct color from describer where color != 'N/A'")).all()
+        sizes = db.execute(text("select distinct size from describer where size != 'N/A'")).all()
+        categories = db.execute(text("select distinct category from describer where category != 'N/A'")).all()
+        return render_template("view.html", products=products, users=users, colors=colors, sizes=sizes, categories=categories)
     
     else:
         params = {"item_id":item_id}
