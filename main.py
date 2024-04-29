@@ -438,8 +438,8 @@ def cart():
             db.execute(text("insert into order_items (order_id, price, quantity, item_name) values (:id, :price, :quantity, :name)"), params)
             db.commit()
             params = {"id":current_info[i][4]}
-            # db.execute(text("delete from cart where cart_id = :id"), params)
-            # db.commit()
+            db.execute(text("delete from cart where cart_id = :id"), params)
+            db.commit()
         return redirect("/customer/order")
     else:
         params = {"id":session["account_num"]}
@@ -458,7 +458,6 @@ def orders():
         added = 0
         for v in order_info:
             if v[0] == i + 1:
-                print(v)
                 added += v[6] * v[7]
         totals.append(added)
                 
