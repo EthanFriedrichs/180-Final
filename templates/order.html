@@ -9,32 +9,38 @@
 <link rel="stylesheet" href="../static/order.css">
 
 <section class="container content-section">
-    {%for i in orders%}
-        <div class="shop-items-0">
-            <div class="shop-item">
-                <input class="hidden_cart_id" value="{{i[0]}}" type="hidden">
-                <span class="shop-item-title">Ordered on: {{i[1]}}</span>
-                <div class="shop-item-details2 status">
-                    <h2 class="shop-item-info">Status: {{i[3]}}</h2>
-                </div>
-                <div class="order-div">
-                    <div class="shop-item-details">
-                        <span class="shop-item-price">Total: {{"${:,.2f}".format(totals[i[0] - 1])}}</span>
+    {%if orders != "None"%}
+        {%for i in orders%}
+            <div class="shop-items-0">
+                <div class="shop-item">
+                    <input class="hidden_cart_id" value="{{i[0]}}" type="hidden">
+                    <span class="shop-item-title">Ordered on: {{i[1]}}</span>
+                    <div class="shop-item-details2 status">
+                        <h2 class="shop-item-info">Status: {{i[3]}}</h2>
                     </div>
-                    {%for v in order_info%}
-                    {%if v[0] == i[0]%}
+                    <div class="order-div">
                         <div class="shop-item-details">
-                            <span class="shop-item-price">Item: {{v[8]}}</span>
+                            <span class="shop-item-price">Total: {{"${:,.2f}".format(totals[i[0] - 1])}}</span>
                         </div>
-                        <div class="shop-item-details2">
-                            <p class="shop-item-info">Cost per item: {{"${:,.2f}".format(v[6])}}</p>
-                            <p class="shop-item-info">Amount in cart: {{v[7]}}</p>
-                        </div>
-                    {%endif%}
-                    {%endfor%}
+                        {%for v in order_info%}
+                        {%if v[0] == i[0]%}
+                            <div class="shop-item-details">
+                                <span class="shop-item-price">Item: {{v[8]}}</span>
+                            </div>
+                            <div class="shop-item-details2">
+                                <p class="shop-item-info">Cost per item: {{"${:,.2f}".format(v[6])}}</p>
+                                <p class="shop-item-info">Amount in cart: {{v[7]}}</p>
+                            </div>
+                        {%endif%}
+                        {%endfor%}
+                    </div>
                 </div>
             </div>
-        </div>
-    {%endfor%}
+        {%endfor%}
+        {%else%}
+            <div class="container content-section no-items">
+                <h2>You have no current orders.</h2>
+            </div>
+    {%endif%}
 </section>
 {% endblock %}
