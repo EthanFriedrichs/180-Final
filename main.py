@@ -227,7 +227,35 @@ def view():
     else:
         products = db.execute(text("select * from items order by user_id")).all()
         users = db.execute(text("select user_id, username from users")).all()
-        return render_template("view.html", products=products, users=users)
+        colors = db.execute(text("select distinct color from describer where color != 'N/A'")).all()
+        sizes = db.execute(text("select distinct size from describer where size != 'N/A'")).all()
+        categories = db.execute(text("select distinct category from describer where category != 'N/A'")).all()
+        return render_template("view.html", products=products, users=users, colors=colors, sizes=sizes, categories=categories)
+    
+
+@app.route("/item/<item_id>", methods=["GET", "POST"])
+@login_required
+@customer_page
+def item_page(item_id):
+    if request.method == "POST":
+        user_id = session["account_num"]
+        params = {"user_id":user_id, "item_id":item_id}
+        in_cart = db.execute(text("select * from cart where user_id = :user_id and item_id = :item_id"), params).all()
+        if len(in_cart) > 0:
+            quanitity = in_cart[0][3] + 1
+            params = {"user_id":user_id, "item_id":item_id, "quant":quanitity}
+            db.execute(text("update cart set quantity = :quant where user_id = :user_id and item_id = :item_id"), params)
+            db.commit()
+        else:
+            db.execute(text("insert into cart (user_id, item_id, quantity) values (:user_id, :item_id, 1)"), params)
+            db.commit()
+        return apology("TODO")
+    
+    else:
+        params = {"item_id":item_id}
+        product = db.execute(text("select * from items where item_id = :item_id"), params).all()
+        return render_template("view_item.html", product=product[0])
+      
 
 @app.route("/admin/add", methods=["GET", "POST"])
 @login_required

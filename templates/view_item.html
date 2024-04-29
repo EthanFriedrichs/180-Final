@@ -23,11 +23,11 @@
                     {% if user[0] == product[4] %}
                         <p class="shop-item-info">Sold By: {{user[1]}}</p>
                     {% endif %}
-
-                    <form action="/item/{{product[0]}}">
-
-                    </form>
                 {% endfor %}
+                
+                <form action="/item/{{product[0]}}" method="post">
+                    <button class="btn btn-primary" type="submit">Add to Cart</button>
+                </form>
             </div>
         </div>
     </div>
