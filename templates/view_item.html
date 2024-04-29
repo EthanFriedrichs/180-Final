@@ -25,9 +25,11 @@
                     {% endif %}
                 {% endfor %}
                 
+                {% if session["account_type"] == "Customer" %}
                 <form action="/item/{{product[0]}}" method="post">
                     <button class="btn btn-primary" type="submit">Add to Cart</button>
                 </form>
+                {% endif %}
             </div>
         </div>
     </div>
