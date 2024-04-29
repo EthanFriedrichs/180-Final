@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, render_template, request, redirect, session
 from flask_session import Session
 from sqlalchemy import create_engine, text
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -75,7 +75,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection string is in the format mysql://user:password@server/database
-conn_str = "mysql://root:Just5fun!@localhost/customers_2"
+conn_str = "mysql://root:ethanpoe125@localhost/customers_2"
 engine = create_engine(conn_str) # echo=True tells you if connection is successful or not
 db = engine.connect()
 
@@ -198,10 +198,6 @@ def view():
         name = request.form.get("name")
         description = request.form.get("description")
         vendor = request.form.get("vendor")
-        color = request.form.get("color")
-        size = request.form.get("size")
-        category = request.form.get("category")
-
         if name:
             name = "%" + name + "%"
         else:
@@ -221,18 +217,13 @@ def view():
         final_products = []
         #iterate over users, grab all their products and filter by other values as well
         for user in users:
-            params = {"name":name, "description":description, "vendor":vendor, "user_id":user[0], "color":color, "size":size, "category":category}
-            products = db.execute(text("select * from items where user_id = :user_id and item_name like :name and descript like :description and item_id in (select item_id from describer where color like :color) and item_id in (select item_id from describer where size like :size) and item_id in (select item_id from describer where category like :category) order by user_id"), params).all()
+            params = {"name":name, "description":description, "vendor":vendor, "user_id":user[0]}
+            products = db.execute(text("select * from items where user_id = :user_id and item_name like :name and descript like :description order by user_id"), params).all()
             if products:
                 for product in products:
-                    print(product)
                     final_products.append(product)
-        
         users = db.execute(text("select user_id, username from users")).all()
-        colors = db.execute(text("select distinct color from describer where color != 'N/A'")).all()
-        sizes = db.execute(text("select distinct size from describer where size != 'N/A'")).all()
-        categories = db.execute(text("select distinct category from describer where category != 'N/A'")).all()
-        return render_template("view.html", products=products, users=users, colors=colors, sizes=sizes, categories=categories)
+        return render_template("view.html", products=final_products, users=users)
     else:
         products = db.execute(text("select * from items order by user_id")).all()
         users = db.execute(text("select user_id, username from users")).all()
@@ -264,7 +255,7 @@ def item_page(item_id):
         params = {"item_id":item_id}
         product = db.execute(text("select * from items where item_id = :item_id"), params).all()
         return render_template("view_item.html", product=product[0])
-
+      
 
 @app.route("/admin/add", methods=["GET", "POST"])
 @login_required
@@ -481,6 +472,9 @@ def cart():
     else:
         params = {"id":session["account_num"]}
         cart_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) where cart.user_id = :id;"), params).all()
+        print(len(cart_info))
+        if (len(cart_info) < 1):
+            cart_info = "None"
         return render_template("cart.html", cart_info=cart_info)
     
 @app.route("/customer/order")
@@ -488,18 +482,22 @@ def cart():
 def orders():
     params = {"id":session["account_num"]}
     orders = db.execute(text("select * from orders where user_id = :id"), params).all()
-    params = {"id":session["account_num"]}
-    order_info = db.execute(text("select * from orders join order_items on (orders.order_id = order_items.order_id) where user_id = :id"), params).all()
-    totals = []
-    for i in range(len(orders)):
-        added = 0
-        for v in order_info:
-            if v[0] == i + 1:
-                added += v[6] * v[7]
-        totals.append(added)
-                
-    return render_template("order.html", orders=orders, order_info=order_info, totals=totals)
-
+    orders = []
+    if (len(orders) > 0):
+        params = {"id":session["account_num"]}
+        order_info = db.execute(text("select * from orders join order_items on (orders.order_id = order_items.order_id) where user_id = :id"), params).all()
+        totals = []
+        for i in range(len(orders)):
+            added = 0
+            for v in order_info:
+                if v[0] == i + 1:
+                    added += v[6] * v[7]
+            totals.append(added)
+                    
+        return render_template("order.html", orders=orders, order_info=order_info, totals=totals)
+    
+    else:
+        return render_template("order.html", orders="None", order_info="None", totals="None")
 
 def apology(message, code=400):
     def escape(s):
