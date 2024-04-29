@@ -9,18 +9,8 @@
 <link rel="stylesheet" href="../static/view.css">
 
 <section class="container content-section">
-    <div class="navbar">
-        <form action="/customer/cart" method="post" class = "center_inputs">
-            <input class="form-control mx-auto w-auto" name="name" placeholder="Product Name" type="text">
-            <br>
-            <input class="form-control mx-auto w-auto" name="description" placeholder="Partial Description" type="text">
-            <br>
-            <input class="form-control" name="vendor" placeholder="Vendor Name" type="text">
-            <br>
-            <button class="btn btn-primary center_inputs" type="submit">Filter</button>
-        </form>
-    </div>
 
+    {%if cart_info != "None"%}
     {% for cart_info in cart_info %}
         <div class="shop-items-0">
             <div class="shop-item">
@@ -42,5 +32,10 @@
                 <button id = "color" class="large-btn" type="submit">Place order</button>
         </div>
     </form>
+    {%else%}
+    <div class="container content-section no-items">
+        <h2>You have no items in your cart.</h2>
+    </div>
+    {%endif%}
 </section>
 {% endblock %}

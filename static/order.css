@@ -73,3 +73,11 @@
     background-color: rgb(109, 206, 239);
     font-size: 20px;
   }
+
+  .no-items {
+    position: absolute;
+}
+
+.no-items h2{
+    padding: 20px;
+}
