@@ -268,12 +268,23 @@ def item_page(item_id):
 @customer_page
 def make_review():   
     if request.method == "POST":
-        return apology("TO DO")
+        stars = request.form.get("stars")
+        description = request.form.get("description")
+        if not stars or not description:
+            return apology("Missing info")
+        
+        params = {"stars":stars, "description":description, "user_id":session["account_num"]}
+        db.execute(text("insert into reviews (user_id, review_text, time_review, stars) values (:user_id, :description, now(), :stars)"), params)
+        db.commit()
+
+        params = {"user_id":session["account_num"]}
+        products_able_to_review = db.execute(text("select items.item_id, items.item_name, items.price, items.descript from items join order_items on (items.item_id = order_items.item_id) join orders on (order_items.order_id = orders.order_id) where orders.user_id = :user_id"), params).all()
+        return render_template("reviews.html", products = products_able_to_review)
     
     else:
-        params = {"user_id", session["account_num"]}
-        products_able_to_review = db.execute(text("select * from items join order_items on (items.item_id = order_items.item_id) join orders on (order_items.order_id = orders.order_id) where orders.user_id = :user_id"), params).all()
-        return apology("TO DO")
+        params = {"user_id":session["account_num"]}
+        products_able_to_review = db.execute(text("select items.item_id, items.item_name, items.price, items.descript from items join order_items on (items.item_id = order_items.item_id) join orders on (order_items.order_id = orders.order_id) where orders.user_id = :user_id"), params).all()
+        return render_template("reviews.html", products = products_able_to_review)
 
 
 @app.route("/admin/add", methods=["GET", "POST"])
