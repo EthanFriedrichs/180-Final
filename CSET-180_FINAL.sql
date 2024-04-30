@@ -22,6 +22,7 @@ foreign key (item_id) references items(item_id));
 insert into describer (size, color, category, item_id) values ("Other", "N/A", "Plants", 3);
 update describer set item_id = 4 where item_id = 1;
 select * from describer;
+delete from describer where color_id between 7 and 12;
 
 drop table images;
 create table images (image_url varchar(255) primary key);
