@@ -7,8 +7,59 @@
 
 {% block body %}
 <link rel="stylesheet" href="../static/order.css">
+<link rel="stylesheet" href = "../statc/review.css">
+<link rel="stylesheet" href = "../statc/view.css">
 
 <section class="container content-section">
-    
+    {%if products != "None"%}
+        {%for product in products %}
+            <form action="/reviews" method="post">
+                <h1>{{product[1]}}</h1>
+                <h2>{{"${:,.2f}".format(product[2])}}</h2>
+                <div class="rating">
+                    <label>
+                    <input type="radio" name="stars" value="1" />
+                    <span class="icon">★</span>
+                    </label>
+                    <label>
+                    <input type="radio" name="stars" value="2" />
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    </label>
+                    <label>
+                    <input type="radio" name="stars" value="3" />
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>   
+                    </label>
+                    <label>
+                    <input type="radio" name="stars" value="4" />
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    </label>
+                    <label>
+                    <input type="radio" name="stars" value="5" />
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    </label>
+                </div>
+                <input autocomplete="off" class="form-control mx-auto w-auto"  name="description" placeholder="I like this product because..." type="text">
+                <input type="hidden" name = "item_id" value="{{product[0]}}">
+                <button class="btn btn-primary" type="submit">Submit Review</button>
+
+            </form>
+            <br>
+            <br>
+        {%endfor%}
+    {%else%}
+        <div class="container content-section no-items">
+            <h2>You have no products available to review.</h2>
+        </div>
+    {%endif%}
 </section>
 {% endblock %}

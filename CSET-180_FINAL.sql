@@ -60,6 +60,7 @@ foreign key (order_id) references orders(order_id),
 foreign key (item_id) references items(item_id));
 select * from order_items;
 
+
 drop table discounts;
 create table discounts (discount_id int primary key auto_increment, discount_expire date not null, discount_percent int not null, item_id int,
 foreign key (item_id) references items(item_id));
