@@ -261,7 +261,20 @@ def item_page(item_id):
         params = {"item_id":item_id}
         product = db.execute(text("select * from items where item_id = :item_id"), params).all()
         return render_template("view_item.html", product=product[0])
-      
+    
+
+@app.route("/reviews", methods=["GET", "POST"])
+@login_required
+@customer_page
+def make_review():   
+    if request.method == "POST":
+        return apology("TO DO")
+    
+    else:
+        params = {"user_id", session["account_num"]}
+        products_able_to_review = db.execute(text("select * from items join order_items on (items.item_id = order_items.item_id) join orders on (order_items.order_id = orders.order_id) where orders.user_id = :user_id"), params).all()
+        return apology("TO DO")
+
 
 @app.route("/admin/add", methods=["GET", "POST"])
 @login_required
