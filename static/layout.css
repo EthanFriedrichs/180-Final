@@ -196,6 +196,7 @@ color:black;
     background-color: rgb(210, 0, 0);
     border: 1px solid transparent;
     padding: .375rem .75rem;
+    margin-left: 10px;
     font-size: 1rem;
     border-radius: .25rem;
     display: inline-block;
@@ -288,6 +289,6 @@ color:black;
     position: absolute;
 }
 
-.no-items h2{
+.no-items h2 {
     padding: 20px;
 }

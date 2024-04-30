@@ -386,7 +386,7 @@ def edit_vendor_item():
         hidden_item_id = request.form.get("item_hidden_id")
         hidden_id = request.form.getlist("hidden_id")
         removals = request.form.getlist("removal")
-        print(hidden_id, removals)
+        # print(hidden_id, removals)
 
         for i in range(len(request.form.getlist("hidden_id"))):
             if (size[i] != "" and request.form.getlist("hidden_id")[i] != "none"):
@@ -434,17 +434,16 @@ def cart():
         for i in range(len(current_info)):
             params = {"id":session["account_num"]}
             order_id = db.execute(text("select * from orders where user_id = :id order by order_id desc;"), params).all()
-            params = {"id":order_id[0][0], "price":current_info[i][2], "quantity":current_info[i][6], "name":current_info[i][1]}
-            db.execute(text("insert into order_items (order_id, price, quantity, item_name) values (:id, :price, :quantity, :name)"), params)
+            params = {"id":order_id[0][0], "price":current_info[i][2], "quantity":current_info[i][6], "name":current_info[i][1], "item_id":current_info[i][0]}
+            db.execute(text("insert into order_items (order_id, price, quantity, item_name, item_id) values (:id, :price, :quantity, :name, :item_id)"), params)
             db.commit()
             params = {"id":current_info[i][4]}
-            db.execute(text("delete from cart where cart_id = :id"), params)
-            db.commit()
+            # db.execute(text("delete from cart where cart_id = :id"), params)
+            # db.commit()
         return redirect("/customer/order")
     else:
         params = {"id":session["account_num"]}
         cart_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) where cart.user_id = :id;"), params).all()
-        print(len(cart_info))
         if (len(cart_info) < 1):
             cart_info = "None"
         return render_template("cart.html", cart_info=cart_info)
@@ -454,7 +453,6 @@ def cart():
 def orders():
     params = {"id":session["account_num"]}
     orders = db.execute(text("select * from orders where user_id = :id"), params).all()
-    orders = []
     if (len(orders) > 0):
         params = {"id":session["account_num"]}
         order_info = db.execute(text("select * from orders join order_items on (orders.order_id = order_items.order_id) where user_id = :id"), params).all()

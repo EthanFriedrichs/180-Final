@@ -52,32 +52,62 @@
                                 <input class="form-control mx-auto w-auto" name="hidden_id" value="{{v[0]}}" type="hidden">
                                 <input class="form-control mx-auto w-auto" name="removal" value="no" type="hidden">
                             </div>
-                            <br>
-                            <button class="color-btn remove-btn" style="margin-left: 10px;" type="button">X</button>
-                            <br>
                         </div>
                     {%endif%}
                 {%endfor%}
-                <div class="colors"></div>
-                
-                <div class = "edit-div">
-                    <button class="color-btn add-btn" style="margin-right: 10px;" type="button">Add New Color Or Size</button>
-                </div>
+
                 <div class = "edit-div">
                     <button id = "color" class="color-btn final-btn" type="submit">Save Changes</button>
                 </div>
             </form>
         </div>
     {%endfor%}
+    <script type = "text/javascript">
+        // Creates the add button for each form
+        var form = document.getElementsByTagName("form");
+        for (let i = 0; i < form.length; i++) {
+            var describers = form[i].getElementsByClassName("describers-div");
+            let container = document.createElement("div");
+            var newRow = document.createElement("div");
+            newRow.classList.add("edit-div");
+            var documentItem = form[i].getElementsByClassName("edit-div")[form[i].getElementsByClassName("edit-div").length - 1];
+            var contents = `
+            <button class="color-btn add-btn" style="margin-right: 10px;" name="" type="button">Add New Color Or Size</button>
+            `;
+            newRow.innerHTML = contents;
+            documentItem.before(newRow);
+            newRow.getElementsByClassName("add-btn")[0].name = i;
+            // Creates the remove button for each new size/color
+            if (describers.length > 0) {
+                for (let v = 0; v < describers.length; v++) {
+                    var newRow = document.createElement("button");
+                    newRow.classList.add("color-btn");
+                    newRow.classList.add("remove-btn");
+                    newRow.name = i
+                    newRow.value = v
+                    newRow.type = "button"
+                    var documentItem = describers[v];
+                    var contents = `X`;
+                    newRow.innerHTML = contents;
+                    documentItem.append(newRow);
+                }
+            }
+        }
+    </script>
 
     <script type = "text/javascript">
         // Makes the "Add New Color Or Size" button add 2 more inputs for color and size
-        elements = document.getElementsByClassName("add-btn");
-        for (let i = 0; i < elements.length; i++) {
-            elements[i].addEventListener("click", function(){
+        // MAKE IT ADD TO THE CORRECT FORM
+        var add_btns = document.getElementsByClassName("add-btn");
+        var form = document.getElementsByTagName("form");
+        for (let i = 0; i < add_btns.length; i++) {
+            add_btns[i].addEventListener("click", function(){
+                let container = document.createElement("div");
                 var newRow = document.createElement("div");
                 newRow.classList.add("edit-div");
-                var documentItem = document.getElementsByClassName("colors")[i];
+                newRow.classList.add("describers-div");
+                var documentItem = form[add_btns[i].name].getElementsByClassName("describers-div");
+                console.log(documentItem)
                 var contents = `
                 <div>
                     <p class = "p-center">Size: N/A</p>
@@ -87,43 +117,43 @@
                     <input class="form-control mx-auto w-auto" name="new_size" placeholder="New size" type="text"><input class="form-control mx-auto w-auto" name="new_color" placeholder="New color" type="text">
                     <input class="form-control mx-auto w-auto" name="hidden_id" value="none" type="hidden">
                 </div>
-                <br>
-                <button class="color-btn remove-btn" style="margin-left: 10px;" type="button">X</button>
-                <br>
+                <button class="color-btn remove-btn" name="" type="button">X</button>
                 `;
                 newRow.innerHTML = contents;
-                documentItem.append(newRow);
+                documentItem.after(newRow);
+                newRow.getElementsByClassName("remove-btn")[newRow.getElementsByClassName("remove-btn").length - 1].name = i
+                form = document.getElementsByTagName("form")[i]
+                newRow.getElementsByClassName("remove-btn")[newRow.getElementsByClassName("remove-btn").length - 1].value = form.getElementsByClassName("remove-btn").length - 1
             })
         };
     </script>
 
     <script type = "text/javascript">
-            // Iterates through each button and then edits the inputs based on what one was clicked (CURRENTLY BROKEN!!!)
-            buttons = document.getElementsByClassName("remove-btn");
-            var offset = 0;
+            // Iterates through each button and then edits the inputs based on what one was clicked (CURRENTLY BEING REWORKED!!!)
+            var form = document.getElementsByTagName("form");
+            var buttons = document.getElementsByClassName("remove-btn");
             for (let i = 0; i < buttons.length; i++) {
                 buttons[i].addEventListener("click", function(){
-                const form = document.getElementsByTagName("form");
-                var elements = form[i].getElementsByClassName("describers-div");
-                if (elements.length > 0) {
-                    textbox = elements[i - 1].getElementsByTagName("input")
-                    if (textbox[3].value == "yes") {
-                        textbox[3].setAttribute("value", "no");
-                        textbox[0].style.border = "1px solid transparent"
-                        textbox[0].setAttribute('placeholder', "New size")
-                        textbox[1].style.border = "1px solid transparent"
-                        textbox[1].setAttribute('placeholder', "New color")
-                    }
-                    else {
-                        textbox[3].setAttribute("value", "yes");
-                        textbox[0].style.border = "1px solid red"
-                        textbox[0].setAttribute('placeholder', "!! Being removed !!")
-                        textbox[1].style.border = "1px solid red"
-                        textbox[1].setAttribute('placeholder', "!! Being removed !!")
-                    }
-            
-                }
-            })
+                    elements = form[buttons[i].name].getElementsByClassName("describers-div");
+                        if (elements.length > 0) {
+                            textbox = elements[buttons[i].value].getElementsByTagName("input")
+                            if (textbox[3].value == "yes") {
+                                textbox[3].setAttribute("value", "no");
+                                textbox[0].style.border = "1px solid transparent"
+                                textbox[0].setAttribute('placeholder', "New size")
+                                textbox[1].style.border = "1px solid transparent"
+                                textbox[1].setAttribute('placeholder', "New color")
+                            }
+                            else {
+                                textbox[3].setAttribute("value", "yes");
+                                textbox[0].style.border = "1px solid red"
+                                textbox[0].setAttribute('placeholder', "!! Being removed !!")
+                                textbox[1].style.border = "1px solid red"
+                                textbox[1].setAttribute('placeholder', "!! Being removed !!")
+                            }
+                    
+                        }
+                })
         };
     </script>
 {% endblock %}
