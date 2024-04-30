@@ -68,28 +68,52 @@
         for (let i = 0; i < form.length; i++) {
             var describers = form[i].getElementsByClassName("describers-div");
             let container = document.createElement("div");
-            var newRow = document.createElement("div");
-            newRow.classList.add("edit-div");
+            var addedRow = document.createElement("div");
+            addedRow.classList.add("edit-div");
             var documentItem = form[i].getElementsByClassName("edit-div")[form[i].getElementsByClassName("edit-div").length - 1];
             var contents = `
             <button class="color-btn add-btn" style="margin-right: 10px;" name="" type="button">Add New Color Or Size</button>
             `;
-            newRow.innerHTML = contents;
-            documentItem.before(newRow);
-            newRow.getElementsByClassName("add-btn")[0].name = i;
+            addedRow.innerHTML = contents;
+            documentItem.before(addedRow);
+            addedRow.getElementsByClassName("add-btn")[0].name = i;
             // Creates the remove button for each new size/color
             if (describers.length > 0) {
                 for (let v = 0; v < describers.length; v++) {
-                    var newRow = document.createElement("button");
-                    newRow.classList.add("color-btn");
-                    newRow.classList.add("remove-btn");
-                    newRow.name = i
-                    newRow.value = v
-                    newRow.type = "button"
+                    addedRow = document.createElement("button");
+                    addedRow.classList.add("color-btn");
+                    addedRow.classList.add("remove-btn");
+                    addedRow.name = i
+                    addedRow.value = v
+                    addedRow.type = "button"
                     var documentItem = describers[v];
                     var contents = `X`;
-                    newRow.innerHTML = contents;
-                    documentItem.append(newRow);
+                    addedRow.innerHTML = contents;
+                    addedRow.addEventListener("click", function(){
+                        for (let a = 0; a < document.getElementsByName(i).length; a++) {
+                            if (a == v) {
+                                var current_form = document.getElementsByTagName("form")[i]
+                                var current_inputs = current_form.getElementsByClassName("describers-div")[v]
+                                var current_textbox = current_inputs.getElementsByTagName("input")
+                                if (current_textbox[3].value == "yes") {
+                                    current_textbox[3].setAttribute("value", "no");
+                                    current_textbox[0].style.border = "1px solid transparent"
+                                    current_textbox[0].setAttribute('placeholder', "New size")
+                                    current_textbox[1].style.border = "1px solid transparent"
+                                    current_textbox[1].setAttribute('placeholder', "New color")
+                                }
+                                else {
+                                    current_textbox[3].setAttribute("value", "yes");
+                                    current_textbox[0].style.border = "1px solid red"
+                                    current_textbox[0].setAttribute('placeholder', "!! Being removed !!")
+                                    current_textbox[1].style.border = "1px solid red"
+                                    current_textbox[1].setAttribute('placeholder', "!! Being removed !!")
+                                }
+                            }
+                        }
+                    })
+
+                    documentItem.append(addedRow);
                 }
             }
         }
@@ -97,17 +121,15 @@
 
     <script type = "text/javascript">
         // Makes the "Add New Color Or Size" button add 2 more inputs for color and size
-        // MAKE IT ADD TO THE CORRECT FORM
         var add_btns = document.getElementsByClassName("add-btn");
-        var form = document.getElementsByTagName("form");
+        var add_form = document.getElementsByTagName("form");
         for (let i = 0; i < add_btns.length; i++) {
             add_btns[i].addEventListener("click", function(){
                 let container = document.createElement("div");
                 var newRow = document.createElement("div");
                 newRow.classList.add("edit-div");
                 newRow.classList.add("describers-div");
-                var documentItem = form[add_btns[i].name].getElementsByClassName("describers-div");
-                console.log(documentItem)
+                var documentItem = add_form[add_btns[i].name].getElementsByClassName("edit-div")[add_form[add_btns[i].name].getElementsByClassName("edit-div").length - 2];
                 var contents = `
                 <div>
                     <p class = "p-center">Size: N/A</p>
@@ -116,44 +138,38 @@
                 <div class="mb-3">
                     <input class="form-control mx-auto w-auto" name="new_size" placeholder="New size" type="text"><input class="form-control mx-auto w-auto" name="new_color" placeholder="New color" type="text">
                     <input class="form-control mx-auto w-auto" name="hidden_id" value="none" type="hidden">
+                    <input class="form-control mx-auto w-auto" name="removal" value="no" type="hidden">
                 </div>
                 <button class="color-btn remove-btn" name="" type="button">X</button>
                 `;
                 newRow.innerHTML = contents;
-                documentItem.after(newRow);
+                documentItem.before(newRow);
                 newRow.getElementsByClassName("remove-btn")[newRow.getElementsByClassName("remove-btn").length - 1].name = i
                 form = document.getElementsByTagName("form")[i]
                 newRow.getElementsByClassName("remove-btn")[newRow.getElementsByClassName("remove-btn").length - 1].value = form.getElementsByClassName("remove-btn").length - 1
+                newRow.getElementsByClassName("remove-btn")[0].addEventListener("click", function(){
+                    second_elements = add_form[add_btns[i].name].getElementsByClassName("describers-div");
+                    if (second_elements.length > 0) {
+                        sec_textbox = second_elements[newRow.getElementsByClassName("remove-btn")[0].value].getElementsByTagName("input")
+                        if (sec_textbox[3].value == "yes") {
+                            sec_textbox[3].setAttribute("value", "no");
+                            sec_textbox[0].style.border = "1px solid transparent"
+                            sec_textbox[0].setAttribute('placeholder', "New size")
+                            sec_textbox[1].style.border = "1px solid transparent"
+                            sec_textbox[1].setAttribute('placeholder', "New color")
+                        }
+                        else {
+                            sec_textbox[3].setAttribute("value", "yes");
+                            sec_textbox[0].style.border = "1px solid red"
+                            sec_textbox[0].setAttribute('placeholder', "!! Being removed !!")
+                            sec_textbox[1].style.border = "1px solid red"
+                            sec_textbox[1].setAttribute('placeholder', "!! Being removed !!")
+                        }
+                
+                    }
+                });
             })
         };
     </script>
 
-    <script type = "text/javascript">
-            // Iterates through each button and then edits the inputs based on what one was clicked (CURRENTLY BEING REWORKED!!!)
-            var form = document.getElementsByTagName("form");
-            var buttons = document.getElementsByClassName("remove-btn");
-            for (let i = 0; i < buttons.length; i++) {
-                buttons[i].addEventListener("click", function(){
-                    elements = form[buttons[i].name].getElementsByClassName("describers-div");
-                        if (elements.length > 0) {
-                            textbox = elements[buttons[i].value].getElementsByTagName("input")
-                            if (textbox[3].value == "yes") {
-                                textbox[3].setAttribute("value", "no");
-                                textbox[0].style.border = "1px solid transparent"
-                                textbox[0].setAttribute('placeholder', "New size")
-                                textbox[1].style.border = "1px solid transparent"
-                                textbox[1].setAttribute('placeholder', "New color")
-                            }
-                            else {
-                                textbox[3].setAttribute("value", "yes");
-                                textbox[0].style.border = "1px solid red"
-                                textbox[0].setAttribute('placeholder', "!! Being removed !!")
-                                textbox[1].style.border = "1px solid red"
-                                textbox[1].setAttribute('placeholder', "!! Being removed !!")
-                            }
-                    
-                        }
-                })
-        };
-    </script>
 {% endblock %}
