@@ -238,29 +238,60 @@ def view():
 @customer_page
 def item_page(item_id):
     if request.method == "POST":
-        user_id = session["account_num"]
-        params = {"user_id":user_id, "item_id":item_id}
-        in_cart = db.execute(text("select * from cart where user_id = :user_id and item_id = :item_id"), params).all()
-        if len(in_cart) > 0:
-            quanitity = in_cart[0][3] + 1
-            params = {"user_id":user_id, "item_id":item_id, "quant":quanitity}
-            db.execute(text("update cart set quantity = :quant where user_id = :user_id and item_id = :item_id"), params)
-            db.commit()
-        else:
-            db.execute(text("insert into cart (user_id, item_id, quantity) values (:user_id, :item_id, 1)"), params)
-            db.commit()
+        if not request.form.get("isFilter"):
 
-        products = db.execute(text("select * from items order by user_id")).all()
-        users = db.execute(text("select user_id, username from users")).all()
-        colors = db.execute(text("select distinct color from describer where color != 'N/A'")).all()
-        sizes = db.execute(text("select distinct size from describer where size != 'N/A'")).all()
-        categories = db.execute(text("select distinct category from describer where category != 'N/A'")).all()
-        return render_template("view.html", products=products, users=users, colors=colors, sizes=sizes, categories=categories)
-    
+            user_id = session["account_num"]
+            params = {"user_id":user_id, "item_id":item_id}
+            in_cart = db.execute(text("select * from cart where user_id = :user_id and item_id = :item_id"), params).all()
+            if len(in_cart) > 0:
+                quanitity = in_cart[0][3] + 1
+                params = {"user_id":user_id, "item_id":item_id, "quant":quanitity}
+                db.execute(text("update cart set quantity = :quant where user_id = :user_id and item_id = :item_id"), params)
+                db.commit()
+            else:
+                db.execute(text("insert into cart (user_id, item_id, quantity) values (:user_id, :item_id, 1)"), params)
+                db.commit()
+
+            products = db.execute(text("select * from items order by user_id")).all()
+            users = db.execute(text("select user_id, username from users")).all()
+            colors = db.execute(text("select distinct color from describer where color != 'N/A'")).all()
+            sizes = db.execute(text("select distinct size from describer where size != 'N/A'")).all()
+            categories = db.execute(text("select distinct category from describer where category != 'N/A'")).all()
+            return render_template("view.html", products=products, users=users, colors=colors, sizes=sizes, categories=categories)
+        else:
+            params = {"item_id":item_id}
+            product = db.execute(text("select * from items where item_id = :item_id"), params).all()
+            users = db.execute(text("select * from users")).all()
+            reviews = db.execute(text("select * from reviews join users on (reviews.user_id = users.user_id)")).all()
+
+
+
+            if request.form.get("filter") != "N/A":
+                params = {"stars":request.form.get("filter")}
+
+                #execute statements where filter is used
+                if request.form.get("sort") == "Ratings":
+                    reviews = db.execute(text("select * from reviews join users on (reviews.user_id = users.user_id) where reviews.stars = :stars order by stars"), params).all()
+                elif request.form.get("sort") == "Time":
+                    reviews = db.execute(text("select * from reviews join users on (reviews.user_id = users.user_id) where reviews.stars = :stars order by time_review"), params).all()
+                else:
+                    reviews = db.execute(text("select * from reviews join users on (reviews.user_id = users.user_id) where reviews.stars = :stars"), params).all()
+
+            else:
+                #execute statements where filter is not used
+                if request.form.get("sort") == "Ratings":
+                    reviews = db.execute(text("select * from reviews join users on (reviews.user_id = users.user_id) order by stars"), params).all()
+                elif request.form.get("sort") == "Time":
+                    reviews = db.execute(text("select * from reviews join users on (reviews.user_id = users.user_id) order by time_review"), params).all()
+            
+            return render_template("view_item.html", product=product[0], users=users, reviews=reviews)
+        
     else:
         params = {"item_id":item_id}
         product = db.execute(text("select * from items where item_id = :item_id"), params).all()
-        return render_template("view_item.html", product=product[0])
+        reviews = db.execute(text("select * from reviews join users on (reviews.user_id = users.user_id)")).all()
+        users = db.execute(text("select * from users")).all()
+        return render_template("view_item.html", product=product[0], users=users, reviews=reviews)
     
 
 @app.route("/reviews", methods=["GET", "POST"])
@@ -270,11 +301,13 @@ def make_review():
     if request.method == "POST":
         stars = request.form.get("stars")
         description = request.form.get("description")
+        item_id = request.form.get("item_id")
+
         if not stars or not description:
             return apology("Missing info")
         
-        params = {"stars":stars, "description":description, "user_id":session["account_num"]}
-        db.execute(text("insert into reviews (user_id, review_text, time_review, stars) values (:user_id, :description, now(), :stars)"), params)
+        params = {"stars":stars, "description":description, "user_id":session["account_num"], "item_id":item_id}
+        db.execute(text("insert into reviews (user_id, item_id, review_text, time_review, stars) values (:user_id, :item_id, :description, now(), :stars)"), params)
         db.commit()
 
         params = {"user_id":session["account_num"]}
@@ -312,6 +345,12 @@ def admin_delete():
     if request.method == "POST":
         product = request.form.get("product_id")
         params = {"product_id":product}
+        db.execute(text("delete from describer where item_id = :product_id"), params)
+        db.execute(text("delete from cart where item_id = :product_id"), params)
+        db.execute(text("delete from complaints where item_id = :product_id"), params)
+        db.execute(text("delete from reviews where item_id = :product_id"), params)
+        db.execute(text("delete from order_items where item_id = :product_id"), params)
+        db.execute(text("delete from discounts where item_id = :product_id"), params)
         db.execute(text("delete from items where item_id = :product_id"), params)
         db.commit()
 
@@ -385,6 +424,12 @@ def vendor_delete():
     if request.method == "POST":
         product = request.form.get("product_id")
         params = {"product_id":product, "user_id":session["account_num"]}
+        db.execute(text("delete from describer where item_id = :product_id"), params)
+        db.execute(text("delete from cart where item_id = :product_id"), params)
+        db.execute(text("delete from complaints where item_id = :product_id"), params)
+        db.execute(text("delete from reviews where item_id = :product_id"), params)
+        db.execute(text("delete from order_items where item_id = :product_id"), params)
+        db.execute(text("delete from discounts where item_id = :product_id"), params)
         db.execute(text("delete from items where item_id = :product_id"), params)
         db.commit()
 
@@ -444,7 +489,6 @@ def edit_vendor_item():
         hidden_item_id = request.form.get("item_hidden_id")
         hidden_id = request.form.getlist("hidden_id")
         removals = request.form.getlist("removal")
-        # print(hidden_id, removals)
 
         for i in range(len(request.form.getlist("hidden_id"))):
             if (size[i] != "" and request.form.getlist("hidden_id")[i] != "none"):
