@@ -484,32 +484,60 @@ def edit_vendor_item():
             db.execute(text("update items set descript = :new_desc where item_name = :name and user_id = :account_num"), params)
             db.commit()
 
-        size = request.form.getlist("new_size")
-        color = request.form.getlist("new_color")
+        new_size = request.form.getlist("new_size")
+        new_color = request.form.getlist("new_color")
         hidden_item_id = request.form.get("item_hidden_id")
         hidden_id = request.form.getlist("hidden_id")
         removals = request.form.getlist("removal")
 
+
         for i in range(len(request.form.getlist("hidden_id"))):
-            if (size[i] != "" and request.form.getlist("hidden_id")[i] != "none"):
-                params = {"size":size[i], "id":request.form.getlist("hidden_id")[i]}
-                db.execute(text("update describer set size = :size where color_id = :id"), params)
-                db.commit()
-            if (color[i] != ""  and request.form.getlist("hidden_id")[i] != "none"):
-                params = {"color":color[i], "id":request.form.getlist("hidden_id")[i]}
-                db.execute(text("update describer set color = :color where color_id = :id"), params)
-                db.commit()
-            if (color[i] != "" and size[i] == "" and request.form.getlist("hidden_id")[i] == "none"):
-                params = {"size":"N/A", "color":color[i], "id":hidden_item_id}
-                db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :id);"), params)
-                db.commit()
-            if (color[i] == "" and size[i] != "" and request.form.getlist("hidden_id")[i] == "none"):
-                params = {"size":size[i], "color":"N/A", "id":hidden_item_id}
-                db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :id);"), params)
-                db.commit()
-            if (color[i] != "" and size[i] != "" and request.form.getlist("hidden_id")[i] == "none"):
-                params = {"size":size[i], "color":color[i], "id":hidden_item_id}
-                db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :id);"), params)
+            # print(request.form.getlist("hidden_id")[i])
+
+            if hidden_id[i] != "none" and removals[i] != "yes":
+                
+                if new_size[i] != "":
+                    if new_color[i] != "":
+                        print("Changing size and color:", new_size[i], "/", new_color[i], "| for color id:", request.form.getlist("hidden_id")[i])
+                        params = {"size":new_size[i], "color":new_color[i], "id":request.form.getlist("hidden_id")[i]}
+                        db.execute(text("update describer set size = :size, color = :color where color_id = :id"), params)
+                        db.commit()
+                    else:
+                        print("Changing only size:", new_size[i], "/ N/A | for color id:", request.form.getlist("hidden_id")[i])
+                        params = {"size":new_size[i], "id":request.form.getlist("hidden_id")[i]}
+                        db.execute(text("update describer set size = :size where color_id = :id"), params)
+                        db.commit()
+                
+                elif new_color[i] != "" and new_size[i] == "":
+                    print("Changing only color: N/A /", new_color[i], "| for color id:", request.form.getlist("hidden_id")[i])
+                    params = {"color":new_color[i], "id":request.form.getlist("hidden_id")[i]}
+                    db.execute(text("update describer set color = :color where color_id = :id"), params)
+                    db.commit()
+
+            elif hidden_id[i] == "none" and removals[i] != "yes":
+                
+                if new_size[i] != "":
+                    if new_color[i] != "":
+                        print("Changing new element size and color:", new_size[i], "/", new_color[i], "| ADD TO DATABASE")
+                        params = {"size":new_size[i], "color":new_color[i], "item_id":hidden_item_id}
+                        db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :item_id)"), params)
+                        db.commit()
+                    else:
+                        print("Changing new element size:", new_size[i], "/ N/A | ADD TO DATABASE")
+                        params = {"size":new_size[i], "color":"N/A", "item_id":hidden_item_id}
+                        db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :item_id)"), params)
+                        db.commit()
+                
+                elif new_color[i] != "" and new_size[i] == "":
+                    print("Changing new element color: N/A /", new_color[i], "| ADD TO DATABASE")
+                    params = {"size":"N/A", "color":new_color[i], "item_id":hidden_item_id}
+                    db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :item_id)"), params)
+                    db.commit()
+
+            elif hidden_id[i] != "none" and removals[i] == "yes":
+                print("Removing color id:", request.form.getlist("hidden_id")[i])
+                params = {"id":request.form.getlist("hidden_id")[i]}
+                db.execute(text("delete from describer where color_id = :id;"), params)
                 db.commit()
 
         params = {"account_num":session["account_num"]}
@@ -540,8 +568,8 @@ def cart():
             db.execute(text("insert into order_items (order_id, price, quantity, item_name, item_id) values (:id, :price, :quantity, :name, :item_id)"), params)
             db.commit()
             params = {"id":current_info[i][4]}
-            # db.execute(text("delete from cart where cart_id = :id"), params)
-            # db.commit()
+            db.execute(text("delete from cart where cart_id = :id"), params)
+            db.commit()
         return redirect("/customer/order")
     else:
         params = {"id":session["account_num"]}
