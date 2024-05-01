@@ -9,6 +9,36 @@
 <link rel="stylesheet" href="../../static/view.css">
 
 <section class="container content-section">
+    <div class="navbar">
+        <form action="/item/{{product[0]}}" method="post" class = "center_inputs">
+            <input type="hidden" name="isFilter" value = "woo">
+            <div style="text-align: right;" class="form-control">
+                <label>Sort Options:</label>
+                    <select name="sort">
+                        <option selected value="N/A">N/A</option>
+                            <option value="Ratings">Ratings</option>
+                            <option value="Time">Time</option>
+                    </select>
+            </div>
+            <br>
+            <div style="text-align: right;" class="form-control">
+                <label>Filter by Stars:</label>
+                    <select name="filter">
+                        <option selected value="N/A">N/A</option>
+                            <option value="5">5 Stars</option>
+                            <option value="4">4 Stars</option>
+                            <option value="3">3 Stars</option>
+                            <option value="2">2 Stars</option>
+                            <option value="1">1 Stars</option>
+
+                    </select>
+            </div>
+            <br>
+            <button class="btn btn-primary center_inputs" type="submit">Filter/Sort</button>
+
+        </form>
+    </div>
+
     <div class="shop-items-0">
         <!-- add items here with jinja -->
         <div class="shop-item">
@@ -24,6 +54,19 @@
                         <p class="shop-item-info">Sold By: {{user[1]}}</p>
                     {% endif %}
                 {% endfor %}
+
+                <br>
+                {% if reviews != "None" %}
+                    <span class="shop-item-price">Reviews</span>
+                    {% for review in reviews %}
+                        {% if review[2] == product[0] %}
+                            <p class="shop-item-info">Reviewed By: {{review[11]}} at {{review[5]}}</p>
+                            <p class="shop-item-info">Stars: {{review[6]}}</p>
+                            <p class="shop-item-info">Review: {{review[3]}}</p>
+                            <br>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
                 
                 {% if session["account_type"] == "Customer" %}
                 <form action="/item/{{product[0]}}" method="post">

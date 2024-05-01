@@ -44,8 +44,9 @@ foreign key (image_url) references images(image_url));
 select * from complaints;
 
 drop table reviews;
-create table reviews (review_id int primary key auto_increment, user_id int, review_text varchar(255) not null, accept_reject varchar(6), time_review datetime, stars float not null, image blob,
-foreign key (user_id) references users(user_id));
+create table reviews (review_id int primary key auto_increment, user_id int, item_id int, review_text varchar(255) not null, accept_reject varchar(6), time_review datetime, stars float not null, image blob,
+foreign key (user_id) references users(user_id),
+foreign key (item_id) references items(item_id));
 select * from reviews;
 
 drop table orders;
