@@ -55,7 +55,21 @@
                     {% endif %}
                 {% endfor %}
 
+                {% for discount in discounts %}
+                    {% if discount[3] == product[0] %}
+                        <p class="shop-item-info">Discount Expiry Date: {{discount[1]}}</p>
+                        <p class="shop-item-info">Discount Value: {{discount[2]}}%</p>
+                    {% endif %}
+                {% endfor %}
+
+                {% if product[6] == 0 %}
+                    <p class="shop-item-info">No warranty</p>
+                {% else %}
+                    <p class="shop-item-info">Warranty Length: {{product[6]}} Days</p>
+                {% endif %}
+
                 <br>
+                
                 {% if reviews != "None" %}
                     <span class="shop-item-price">Reviews</span>
                     {% for review in reviews %}
