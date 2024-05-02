@@ -75,7 +75,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection string is in the format mysql://user:password@server/database
-conn_str = "mysql://root:Just5fun!@localhost/customers_2"
+conn_str = "mysql://root:ethanpoe125@localhost/customers_2"
 engine = create_engine(conn_str) # echo=True tells you if connection is successful or not
 db = engine.connect()
 
@@ -437,7 +437,7 @@ def add_item():
                     db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                     db.commit()
                 elif dis_time_type == "months":
-                    discount_expire = current_date + timedelta(days=int(dis_length) * 30)
+                    discount_expire = current_date + timedelta(days=int(dis_length) * 31)
                     params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
                     db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                     db.commit()
@@ -579,16 +579,12 @@ def edit_vendor_item():
 
         params = {"account_num":session["account_num"]}
         items = db.execute(text("select * from items where user_id = :account_num"),params).all()
-        describers = db.execute(text("select * from describer")).all()
-        discounts = db.execute(text("select * from discounts")).all()
-        return render_template("edit_item.html", items=items, describers=describers)
-    
-    else:
-        params = {"account_num":session["account_num"]}
-        items = db.execute(text("select * from items where user_id = :account_num"),params).all()
-        describers = db.execute(text("select * from describer")).all()
-        discounts = db.execute(text("select * from discounts")).all()
+        params = {"id":session["account_num"]}
+        describers = db.execute(text("select color_id, size, color, category, describer.item_id from describer join items on (describer.item_id = items.item_id) where user_id = :id"), params).all()
+        params = {"id":session["account_num"]}
+        discounts = db.execute(text("select discount_id, discount_expire, discount_percent, discounts.item_id from discounts join items on (discounts.item_id = items.item_id) where user_id = :id"), params).all()
         formatted_discounts = []
+
         for i in discounts:
             day = i[1].strftime("%d")
             month = i[1].strftime("%m")
@@ -597,12 +593,112 @@ def edit_vendor_item():
             minute = i[1].strftime("%M")
             hour = i[1].strftime("%H")
             formatted_discounts.append([i[0], month, day, year, hour, minute, second, i[2], i[3]])
-        expires_in = []
-        combined_date = month + "/" + day + "/" + year + " " + hour + ":" + minute + ":" + second
-        # MAKE IT SO THAT IT SUBTRACTS THE CURRENT TIME FROM THE EXPIREY TIME
-        print(datetime.strptime(combined_date, "%m/%d/%Y %H:%M:%S"))
 
-        return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts)
+        expires_in = []
+        current_time = datetime.now()
+        ct_month = int(current_time.strftime("%m")) # ct refers to current time
+        ct_day = int(current_time.strftime("%d"))
+        ct_year = int(current_time.strftime("%Y"))
+        ct_hour = int(current_time.strftime("%H"))
+        ct_minute = int(current_time.strftime("%M"))
+        ct_second = int(current_time.strftime("%S"))
+        
+        for i in range(len(discounts)):
+            
+            if int(formatted_discounts[i][3]) >= ct_year:
+                
+                if int(formatted_discounts[i][1]) >= ct_month:
+
+                    if int(formatted_discounts[i][2]) >= ct_day:
+
+                        if int(formatted_discounts[i][4]) >= ct_hour:
+
+                            if int(formatted_discounts[i][5]) >= ct_minute:
+
+                                if int(formatted_discounts[i][6]) >= ct_second:
+                                    expires_in.append(["Not expired yet.", formatted_discounts[i][8]])
+
+                                else:
+                                    expires_in.append(["Expired " + str(ct_second - int(formatted_discounts[i][6])) + " second(s) ago.",formatted_discounts[i][8]])
+
+                            else:
+                                expires_in.append(["Expired " + str(ct_minute - int(formatted_discounts[i][5])) + " minute(s) ago.",formatted_discounts[i][8]])
+
+                        else:
+                            expires_in.append(["Expired " + str(ct_hour - int(formatted_discounts[i][4])) + " hour(s) ago.",formatted_discounts[i][8]])
+
+                    else:
+                        expires_in.append(["Expired " + str(ct_day - int(formatted_discounts[i][2])) + " day(s) ago.",formatted_discounts[i][8]])
+                
+                else:
+                    expires_in.append(["Expired " + str(ct_month - int(formatted_discounts[i][1])) + " month(s) ago.",formatted_discounts[i][8]])
+
+            else:
+                expires_in.append(["Expired " + str(ct_year - int(formatted_discounts[i][3])) + " year(s) ago.",formatted_discounts[i][8]])
+
+        return render_template("edit_item.html", items=items, describers=describers, discounts=discounts)
+    
+    else:
+        params = {"account_num":session["account_num"]}
+        items = db.execute(text("select * from items where user_id = :account_num"),params).all()
+        params = {"id":session["account_num"]}
+        describers = db.execute(text("select color_id, size, color, category, describer.item_id from describer join items on (describer.item_id = items.item_id) where user_id = :id"), params).all()
+        params = {"id":session["account_num"]}
+        discounts = db.execute(text("select discount_id, discount_expire, discount_percent, discounts.item_id from discounts join items on (discounts.item_id = items.item_id) where user_id = :id"), params).all()
+        formatted_discounts = []
+
+        for i in discounts:
+            day = i[1].strftime("%d")
+            month = i[1].strftime("%m")
+            year = i[1].strftime("%Y")
+            second = i[1].strftime("%S")
+            minute = i[1].strftime("%M")
+            hour = i[1].strftime("%H")
+            formatted_discounts.append([i[0], month, day, year, hour, minute, second, i[2], i[3]])
+
+        expires_in = []
+        current_time = datetime.now()
+        ct_month = int(current_time.strftime("%m")) # ct refers to current time
+        ct_day = int(current_time.strftime("%d"))
+        ct_year = int(current_time.strftime("%Y"))
+        ct_hour = int(current_time.strftime("%H"))
+        ct_minute = int(current_time.strftime("%M"))
+        ct_second = int(current_time.strftime("%S"))
+        
+        for i in range(len(discounts)):
+            
+            if int(formatted_discounts[i][3]) >= ct_year:
+                
+                if int(formatted_discounts[i][1]) >= ct_month:
+
+                    if int(formatted_discounts[i][2]) >= ct_day:
+
+                        if int(formatted_discounts[i][4]) >= ct_hour:
+
+                            if int(formatted_discounts[i][5]) >= ct_minute:
+
+                                if int(formatted_discounts[i][6]) >= ct_second:
+                                    expires_in.append(["Not expired yet.", formatted_discounts[i][8]])
+
+                                else:
+                                    expires_in.append(["Expired " + str(ct_second - int(formatted_discounts[i][6])) + " second(s) ago.",formatted_discounts[i][8]])
+
+                            else:
+                                expires_in.append(["Expired " + str(ct_minute - int(formatted_discounts[i][5])) + " minute(s) ago.",formatted_discounts[i][8]])
+
+                        else:
+                            expires_in.append(["Expired " + str(ct_hour - int(formatted_discounts[i][4])) + " hour(s) ago.",formatted_discounts[i][8]])
+
+                    else:
+                        expires_in.append(["Expired " + str(ct_day - int(formatted_discounts[i][2])) + " day(s) ago.",formatted_discounts[i][8]])
+                
+                else:
+                    expires_in.append(["Expired " + str(ct_month - int(formatted_discounts[i][1])) + " month(s) ago.",formatted_discounts[i][8]])
+
+            else:
+                expires_in.append(["Expired " + str(ct_year - int(formatted_discounts[i][3])) + " year(s) ago.",formatted_discounts[i][8]])
+
+        return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in)
 
 @app.route("/customer/cart", methods=["GET", "POST"])
 @login_required

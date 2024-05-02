@@ -69,6 +69,13 @@
                         <input class="base-input month-input" name="second_input" placeholder="{{discounts[i[0] - 1][6]}}" type="number" min="1" step="1">
                     </div>
                 </div>
+                <div class="edit-div discount-div">
+                    {%for e in expires_in%}
+                        {%if e[1] == i[0]%}
+                        <p>{{e[0]}}</p>
+                        {%endif%}
+                    {%endfor%}
+                </div>
                 {%for v in describers%}
                     {%if v[4] == i[0]%}
                         <div class = "edit-div describers-div">

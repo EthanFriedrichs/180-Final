@@ -23,6 +23,7 @@ insert into describer (size, color, category, item_id) values ("Other", "N/A", "
 update describer set item_id = 4 where item_id = 1;
 select * from describer;
 delete from describer where color_id between 7 and 12;
+select color_id, size, color, category, describer.item_id from describer join items on (describer.item_id = items.item_id) where user_id = 2;
 
 drop table images;
 create table images (image_url varchar(255) primary key);
@@ -68,3 +69,4 @@ create table discounts (discount_id int primary key auto_increment, discount_exp
 foreign key (item_id) references items(item_id));
 select * from discounts;
 insert into discounts (discount_expire, discount_percent, item_id) values (now(), 20, 2);
+select discount_id, discount_expire, discount_percent, discounts.item_id from discounts join items on (discounts.item_id = items.item_id) where user_id = 2;
