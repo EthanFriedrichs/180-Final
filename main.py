@@ -325,9 +325,43 @@ def make_review():
 @admin_page
 def admin_add():
     if request.method == "POST":
-        return apology("TO DO")
+        name = request.form.get("item_name")
+        desc = request.form.get("desc")
+        price = request.form.get("item_price")
+        stock = request.form.get("curr_stock")
+        warranty = request.form.get("warranty_length")
+        color = request.form.getlist("color")
+        size = request.form.getlist("size")
+        if not request.form.get("vendor"):
+            return apology("No vendor selected")
+        params = {"user":request.form.get("vendor"), "name":name}
+        item_check = db.execute(text("select * from items where user_id = :user and item_name = :name"), params).all()
+        
+        if len(item_check) < 1:
+
+            params = {"name":name, "price":price, "stock":stock, "user":request.form.get("vendor"), "warranty":warranty, "desc":desc}
+            db.execute(text("insert into items (item_name, price, in_stock, user_id, warranty_length, descript) values (:name, :price, :stock, :user, :warranty, :desc)"), params)
+            db.commit()
+
+            curr_items = db.execute(text("select * from items")).all()
+            for i in range(len(color)):
+                curr_color = color[i]
+                curr_size = size[i]
+                if curr_color == "":
+                    curr_color = "N/A"
+                if curr_size == "":
+                    curr_size = "N/A"
+                if (curr_color != "N/A") and (curr_size != "N/A"):
+                    params = {"size":curr_size, "color":curr_color, "id":len(curr_items)}
+                    db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :id)"), params)
+                    db.commit()
+        else:
+            return apology("Item already exists")
+
+        return render_template("admin_add_item.html")
     else:
-        return apology("TO DO")
+        vendors = db.execute(text("select user_id, username from users where user_type = 'Vendor'")).all()
+        return render_template("admin_add_item.html", vendors=vendors)
 
 @app.route("/admin/edit", methods=["GET", "POST"])
 @login_required
