@@ -40,8 +40,37 @@
                         <textarea class="form-control mx-auto w-auto" style="height: 300px;" maxlength="255" name="new_desc" placeholder="New description" type="text"></textarea>
                     </div>
                 </div>
+                <div class="edit-div discount-div">
+                    <label>Discount</label>
+                </div>
+                <div class="edit-div discount-div">
+                    <div class="mini-div">
+                        <p>Month</p>
+                        <input class="base-input month-input" name="month_input" placeholder="{{discounts[i[0] - 1][1]}}" type="number" min="1" step="1">
+                    </div>
+                    <div class="mini-div">
+                        <p>Day</p>
+                        <input class="base-input day-input" name="day_input" placeholder="{{discounts[i[0] - 1][2]}}" type="number" min="1" step="1">
+                    </div>
+                    <div class="mini-div">
+                        <p>Year</p>
+                        <input class="base-input year-input" name="year_input" placeholder="{{discounts[i[0] - 1][3]}}" type="number" min="{{discounts[i[0] - 1][3]}}" step="1">
+                    </div>
+                    <div class="mini-div">
+                        <p>Hour</p>
+                        <input class="base-input month-input" name="hour_input" placeholder="{{discounts[i[0] - 1][4]}}" type="number" min="1" step="1">
+                    </div>
+                    <div class="mini-div">
+                        <p>Minute</p>
+                        <input class="base-input month-input" name="minute_input" placeholder="{{discounts[i[0] - 1][5]}}" type="number" min="1" step="1">
+                    </div>
+                    <div class="mini-div">
+                        <p>Second</p>
+                        <input class="base-input month-input" name="second_input" placeholder="{{discounts[i[0] - 1][6]}}" type="number" min="1" step="1">
+                    </div>
+                </div>
                 {%for v in describers%}
-                    {%if v[3] == i[0]%}
+                    {%if v[4] == i[0]%}
                         <div class = "edit-div describers-div">
                             <div>
                                 <p class = "p-center">Size: {{v[1]}}</p>

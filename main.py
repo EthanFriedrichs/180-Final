@@ -3,7 +3,7 @@ from flask_session import Session
 from sqlalchemy import create_engine, text
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def login_required(
     f,
@@ -287,8 +287,12 @@ def add_item():
         price = request.form.get("item_price")
         stock = request.form.get("curr_stock")
         warranty = request.form.get("warranty_length")
+        category = request.form.get("category")
         color = request.form.getlist("color")
         size = request.form.getlist("size")
+        dis_percent = request.form.get("discount_percent")
+        dis_length = request.form.get("discount_length")
+        dis_time_type = request.form.get("discount_time_type")
         params = {"email":session["user_id"]}
         user = db.execute(text("select * from users where email = :email"), params).all()
         params = {"user":user[0][0], "name":name}
@@ -309,9 +313,47 @@ def add_item():
                 if curr_size == "":
                     curr_size = "N/A"
                 if (curr_color != "N/A") and (curr_size != "N/A"):
-                    params = {"size":curr_size, "color":curr_color, "id":len(curr_items)}
-                    db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :id)"), params)
+                    params = {"size":curr_size, "color":curr_color, "category":category, "id":len(curr_items)}
+                    db.execute(text("insert into describer (size, color, category, item_id) values (:size, :color, :category, :id)"), params)
                     db.commit()
+
+            if dis_percent != "" and dis_length != "" and dis_time_type != "%":
+                current_date = datetime.now()
+                if dis_time_type == "minutes":
+                    discount_expire = current_date + timedelta(seconds=int(dis_length) * 60)
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
+                    db.commit()
+                elif dis_time_type == "hours":
+                    discount_expire = current_date + timedelta(hours=int(dis_length))
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
+                    db.commit()
+                elif dis_time_type == "days":
+                    discount_expire = current_date + timedelta(days=int(dis_length))
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
+                    db.commit()
+                elif dis_time_type == "weeks":
+                    discount_expire = current_date + timedelta(weeks=int(dis_length))
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
+                    db.commit()
+                elif dis_time_type == "months":
+                    discount_expire = current_date + timedelta(days=int(dis_length) * 30)
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
+                    db.commit()
+                elif dis_time_type == "years":
+                    discount_expire = current_date + timedelta(days=int(dis_length) * 365)
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
+                    db.commit()
+            else:
+                params = {"expire":datetime.now(), "percent":0, "id":len(curr_items)}
+                db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
+                db.commit()
+
         else:
             return apology("Item already exists")
 
@@ -337,10 +379,6 @@ def vendor_delete():
         params = {"user_id":session["account_num"]}
         products = db.execute(text("select * from items where user_id = :user_id order by user_id"), params).all()
         return render_template("vendor_delete.html", products=products)
-
-# Display all attributes of the item
-# Add button to save the edits
-# Add the correct amounts of inputs for size and color
     
 @app.route("/vendor/edit", methods=["GET", "POST"])
 @login_required
@@ -386,11 +424,6 @@ def edit_vendor_item():
         hidden_item_id = request.form.get("item_hidden_id")
         hidden_id = request.form.getlist("hidden_id")
         removals = request.form.getlist("removal")
-        print(new_size)
-        print(new_color)
-        print(hidden_item_id)
-        print(hidden_id)
-        print(removals)
 
         for i in range(len(request.form.getlist("hidden_id"))):
             # print(request.form.getlist("hidden_id")[i])
@@ -399,18 +432,18 @@ def edit_vendor_item():
                 
                 if new_size[i] != "":
                     if new_color[i] != "":
-                        print("Changing size and color:", new_size[i], "/", new_color[i], "| for color id:", request.form.getlist("hidden_id")[i])
+                        # print("Changing size and color:", new_size[i], "/", new_color[i], "| for color id:", request.form.getlist("hidden_id")[i])
                         params = {"size":new_size[i], "color":new_color[i], "id":request.form.getlist("hidden_id")[i]}
                         db.execute(text("update describer set size = :size, color = :color where color_id = :id"), params)
                         db.commit()
                     else:
-                        print("Changing only size:", new_size[i], "/ N/A | for color id:", request.form.getlist("hidden_id")[i])
+                        # print("Changing only size:", new_size[i], "/ N/A | for color id:", request.form.getlist("hidden_id")[i])
                         params = {"size":new_size[i], "id":request.form.getlist("hidden_id")[i]}
                         db.execute(text("update describer set size = :size where color_id = :id"), params)
                         db.commit()
                 
                 elif new_color[i] != "" and new_size[i] == "":
-                    print("Changing only color: N/A /", new_color[i], "| for color id:", request.form.getlist("hidden_id")[i])
+                    # print("Changing only color: N/A /", new_color[i], "| for color id:", request.form.getlist("hidden_id")[i])
                     params = {"color":new_color[i], "id":request.form.getlist("hidden_id")[i]}
                     db.execute(text("update describer set color = :color where color_id = :id"), params)
                     db.commit()
@@ -419,24 +452,24 @@ def edit_vendor_item():
                 
                 if new_size[i] != "":
                     if new_color[i] != "":
-                        print("Changing new element size and color:", new_size[i], "/", new_color[i], "| ADD TO DATABASE")
+                        # print("Changing new element size and color:", new_size[i], "/", new_color[i], "| ADD TO DATABASE")
                         params = {"size":new_size[i], "color":new_color[i], "item_id":hidden_item_id}
                         db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :item_id)"), params)
                         db.commit()
                     else:
-                        print("Changing new element size:", new_size[i], "/ N/A | ADD TO DATABASE")
+                        # print("Changing new element size:", new_size[i], "/ N/A | ADD TO DATABASE")
                         params = {"size":new_size[i], "color":"N/A", "item_id":hidden_item_id}
                         db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :item_id)"), params)
                         db.commit()
                 
                 elif new_color[i] != "" and new_size[i] == "":
-                    print("Changing new element color: N/A /", new_color[i], "| ADD TO DATABASE")
+                    # print("Changing new element color: N/A /", new_color[i], "| ADD TO DATABASE")
                     params = {"size":"N/A", "color":new_color[i], "item_id":hidden_item_id}
                     db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :item_id)"), params)
                     db.commit()
 
             elif hidden_id[i] != "none" and removals[i] == "yes":
-                print("Removing color id:", request.form.getlist("hidden_id")[i])
+                # print("Removing color id:", request.form.getlist("hidden_id")[i])
                 params = {"id":request.form.getlist("hidden_id")[i]}
                 db.execute(text("delete from describer where color_id = :id;"), params)
                 db.commit()
@@ -444,12 +477,29 @@ def edit_vendor_item():
         params = {"account_num":session["account_num"]}
         items = db.execute(text("select * from items where user_id = :account_num"),params).all()
         describers = db.execute(text("select * from describer")).all()
+        discounts = db.execute(text("select * from discounts")).all()
         return render_template("edit_item.html", items=items, describers=describers)
+    
     else:
         params = {"account_num":session["account_num"]}
         items = db.execute(text("select * from items where user_id = :account_num"),params).all()
         describers = db.execute(text("select * from describer")).all()
-        return render_template("edit_item.html", items=items, describers=describers)
+        discounts = db.execute(text("select * from discounts")).all()
+        formatted_discounts = []
+        for i in discounts:
+            day = i[1].strftime("%d")
+            month = i[1].strftime("%m")
+            year = i[1].strftime("%Y")
+            second = i[1].strftime("%S")
+            minute = i[1].strftime("%M")
+            hour = i[1].strftime("%H")
+            formatted_discounts.append([i[0], month, day, year, hour, minute, second, i[2], i[3]])
+        expires_in = []
+        combined_date = month + "/" + day + "/" + year + " " + hour + ":" + minute + ":" + second
+        # MAKE IT SO THAT IT SUBTRACTS THE CURRENT TIME FROM THE EXPIREY TIME
+        print(datetime.strptime(combined_date, "%m/%d/%Y %H:%M:%S"))
+
+        return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts)
 
 @app.route("/customer/cart", methods=["GET", "POST"])
 @login_required
