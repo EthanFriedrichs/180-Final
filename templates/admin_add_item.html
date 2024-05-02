@@ -1,0 +1,104 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Add Items
+{% endblock %}
+
+{% block body %}
+    <h1>This is the add items page</h1>
+    <div style="min-height: 75vh; display:flex; align-items:center">
+        <div class="container-fluid py-5 text-center">
+            <form action="/admin/add" method="post">
+                <div class="mb-3">
+                    <input autocomplete="off" autofocus class="form-control mx-auto w-auto"  name="item_name" placeholder="Item Name" type="text" required>
+                </div>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="desc" placeholder="Item Description" type="text" required>
+                </div>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="category" placeholder="Category" type="text" required>
+                </div>
+                <div class="colors">
+                    <div class="mb-2">
+                        <input class="side-input" name="color" placeholder="Color" type="text" required> <input class="side-input" name="size" placeholder="Size" type="text" required>
+                    </div>
+                </div>
+                
+                <button id = "color" class="color-btn add-btn" type="button">Add New Color Or Size</button>
+                <br>
+                <script type = "text/javascript">
+                    document.getElementById("color").addEventListener("click", function(){
+                        var newRow = document.createElement("div");
+                        newRow.classList.add("mb-2");
+                        var documentItem = document.getElementsByClassName("colors")[0];
+                        var contents = `
+                        <input class="side-input" name="color" placeholder="Color" type="text"> <input class="side-input" name="size" placeholder="Size" type="text">
+                        `;
+                        newRow.innerHTML = contents;
+                        documentItem.append(newRow);
+                    });
+                </script>
+
+                <button id = "remove" class="color-btn remove-btn" type="button">REMOVE</button>
+                <br>
+                <script type = "text/javascript">
+                    document.getElementById("remove").addEventListener("click", function(){
+                        const elements = document.getElementsByClassName("mb-2");
+                        if (elements.length > 1)
+                            elements[elements.length - 1].parentNode.removeChild(elements[elements.length - 1]);
+                    });
+                </script>
+
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="item_price" placeholder="Item Price" type="text" required>
+                </div>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="curr_stock" placeholder="Current Stock" type="text" required>
+                </div>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="warranty_length" placeholder="Warranty Length (Days)" type="text" required>
+                </div>
+                <div class="mb-3">
+                    <select name="vendor" style="appearance: menulist;" class="form-control mx-auto w-auto">
+                        <option selected disabled>Vendor</option>
+                        {% for vendor in vendors %}
+                            <option value="{{vendor[0]}}">{{vendor[1]}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button class="btn btn-primary" type="submit">Add New Item</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+
+<!-- <script type = "text/javascript">
+    //get button with id, add event listener to add to cart on click
+    id = {{dessert["meal_id"]}}
+
+    document.getElementById(id).addEventListener("click", function(){
+        var cartRow = document.createElement("div");
+        cartRow.classList.add("cart-row");
+        var cartItem = document.getElementsByClassName("cart-items")[0];
+        price = {{dessert["meal_price"]}}
+        var cartRowContents = `
+            <div class="cart-item cart-column">
+                <img class="cart-item-image" src='{{dessert["img_link"]}}'>
+                <span class="cart-item-title">{{dessert["meal_name"]}}</span>
+            </div>
+            <span class="cart-price cart-column cart-price-true">{{dessert["meal_price"]}}</span>
+            <div class="cart-quantity cart-column">
+                <input class="cart-quantity-input" name='quantity{{dessert["meal_id"]}}' type="number" value="1" min=1 max=10>
+                <button class="btn btn-danger" type="button">REMOVE</button>
+                <input type ="hidden" name ='id{{dessert["meal_id"]}}' value ='{{dessert["meal_id"]}}'></input>
+            </div>
+        `;
+        cartRow.innerHTML = cartRowContents;
+        cartItem.append(cartRow);
+
+        cartRow.getElementsByClassName("cart-quantity-input")[0].addEventListener('change', updatePrice);
+        updatePrice();
+        cartRow.getElementsByClassName("btn-danger")[0].addEventListener('click', () => {removeItem('{{dessert["meal_name"]}}')});
+    });
+</script> -->
