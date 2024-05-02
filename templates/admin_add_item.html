@@ -59,6 +59,18 @@
                     <input class="form-control mx-auto w-auto" name="warranty_length" placeholder="Warranty Length (Days)" type="text" required>
                 </div>
                 <div class="mb-3">
+                    <input class="small-input" name="discount_percent" placeholder="Discount Percent" type="number" min="0" step="1">
+                    <input class="small-input" name="discount_length" placeholder="Discount Length" type="number" min="0">
+                    <select name="discount_time_type" class="add-select">
+                        <option selected value="%">N/A</option>
+                        <option value="minutes">Minutes</option>
+                        <option value="hours">Hours</option>
+                        <option value="days">Days</option>
+                        <option value="weeks">Weeks</option>
+                        <option value="months">Months</option>
+                    </select>
+                </div>
+                <div class="mb-3">
                     <select name="vendor" style="appearance: menulist;" class="form-control mx-auto w-auto">
                         <option selected disabled>Vendor</option>
                         {% for vendor in vendors %}

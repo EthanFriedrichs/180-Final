@@ -290,8 +290,9 @@ def item_page(item_id):
         params = {"item_id":item_id}
         product = db.execute(text("select * from items where item_id = :item_id"), params).all()
         reviews = db.execute(text("select * from reviews join users on (reviews.user_id = users.user_id)")).all()
+        discounts = db.execute(text("select * from discounts")).all()
         users = db.execute(text("select * from users")).all()
-        return render_template("view_item.html", product=product[0], users=users, reviews=reviews)
+        return render_template("view_item.html", product=product[0], users=users, reviews=reviews, discounts=discounts)
     
 
 @app.route("/reviews", methods=["GET", "POST"])
@@ -332,6 +333,9 @@ def admin_add():
         warranty = request.form.get("warranty_length")
         color = request.form.getlist("color")
         size = request.form.getlist("size")
+        dis_percent = request.form.get("discount_percent")
+        dis_length = request.form.get("discount_length")
+        dis_time_type = request.form.get("discount_time_type")
         if not request.form.get("vendor"):
             return apology("No vendor selected")
         params = {"user":request.form.get("vendor"), "name":name}
@@ -355,10 +359,43 @@ def admin_add():
                     params = {"size":curr_size, "color":curr_color, "id":len(curr_items)}
                     db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :id)"), params)
                     db.commit()
+
+            if dis_percent != "" and dis_length != "" and dis_time_type != "%":
+                current_date = datetime.now()
+                if dis_time_type == "minutes":
+                    discount_expire = current_date + timedelta(seconds=int(dis_length) * 60)
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
+                    db.commit()
+                elif dis_time_type == "hours":
+                    discount_expire = current_date + timedelta(hours=int(dis_length))
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
+                    db.commit()
+                elif dis_time_type == "days":
+                    discount_expire = current_date + timedelta(days=int(dis_length))
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
+                    db.commit()
+                elif dis_time_type == "weeks":
+                    discount_expire = current_date + timedelta(weeks=int(dis_length))
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
+                    db.commit()
+                elif dis_time_type == "months":
+                    discount_expire = current_date + timedelta(days=int(dis_length) * 31)
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
+                    db.commit()
+            else:
+                params = {"expire":datetime.now(), "percent":0, "id":len(curr_items)}
+                db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
+                db.commit()
         else:
             return apology("Item already exists")
 
-        return render_template("admin_add_item.html")
+        vendors = db.execute(text("select user_id, username from users where user_type = 'Vendor'")).all()
+        return render_template("admin_add_item.html", vendors=vendors)
     else:
         vendors = db.execute(text("select user_id, username from users where user_type = 'Vendor'")).all()
         return render_template("admin_add_item.html", vendors=vendors)
@@ -471,12 +508,7 @@ def add_item():
                     db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                     db.commit()
                 elif dis_time_type == "months":
-                    discount_expire = current_date + timedelta(days=int(dis_length) * 30)
-                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
-                    db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
-                    db.commit()
-                elif dis_time_type == "years":
-                    discount_expire = current_date + timedelta(days=int(dis_length) * 365)
+                    discount_expire = current_date + timedelta(days=int(dis_length) * 31)
                     params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
                     db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                     db.commit()
