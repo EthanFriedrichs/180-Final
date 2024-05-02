@@ -292,3 +292,84 @@ color:black;
 .no-items h2 {
     padding: 20px;
 }
+
+.small-input {
+    width: 175px;
+    display: inline-block;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    appearance: none;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.small-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(197, 121, 14, 0.25);
+}
+
+.add-select {
+    width: 150px;
+    display: inline-block;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    appearance: menulist;
+}
+
+.base-input {
+    display: inline-block;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    appearance: none;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.date-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(197, 121, 14, 0.25);
+}
+
+.month-input {
+    width: 70px;
+}
+
+.day-input {
+    width: 70px;
+}
+.year-input {
+    width: 80px;
+}
+
+.mini-div {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    margin: 3px;
+}
+
+.mini-div p{
+    margin: 0px;
+}
+
+.discount-div {
+    margin-bottom: 15px;
+}

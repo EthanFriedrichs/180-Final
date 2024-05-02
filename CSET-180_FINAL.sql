@@ -64,6 +64,7 @@ select * from order_items;
 
 
 drop table discounts;
-create table discounts (discount_id int primary key auto_increment, discount_expire date not null, discount_percent int not null, item_id int,
+create table discounts (discount_id int primary key auto_increment, discount_expire datetime not null, discount_percent int not null, item_id int,
 foreign key (item_id) references items(item_id));
 select * from discounts;
+insert into discounts (discount_expire, discount_percent, item_id) values (now(), 20, 2);
