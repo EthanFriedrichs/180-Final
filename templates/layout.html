@@ -25,12 +25,6 @@
                   <button class="barItem input" style="margin-left:10px;">
                     <a href="/view">View Items</a>
                   </button>
-                  <button class="barItem input" style="margin-left:10px;">
-                    <a href="/customer/cart">My Cart</a>
-                  </button>
-                  <button class="barItem input" style="margin-left:10px;">
-                    <a href="/customer/order">My Orders</a>
-                  </button>
                   {% endif %}
                   
                   {% if session["account_type"] == "Admin" %}
@@ -55,6 +49,15 @@
                   {% endif %}
 
                   {% if session["account_type"] == "Customer" %}
+                  <button class="barItem input" style="margin-left:10px;">
+                    <a href="/customer/cart">My Cart</a>
+                  </button>
+                  <button class="barItem input" style="margin-left:10px;">
+                    <a href="/customer/order">My Orders</a>
+                  </button>
+                  <button class="barItem input" style="margin-left:10px;">
+                    <a href="/reviews">Review</a>
+                  </button>
                   {% endif %}
                   
                 </div>
