@@ -7,8 +7,8 @@
 {% block body %}
     <h1>This is the add items page</h1>
     <div style="min-height: 75vh; display:flex; align-items:center">
-        <div class="container py-5 text-center">
-            <form action="/vendor/add" method="post">
+        <div class="container-fluid py-5 text-center">
+            <form action="/admin/add" method="post">
                 <div class="mb-3">
                     <input autocomplete="off" autofocus class="form-control mx-auto w-auto"  name="item_name" placeholder="Item Name" type="text" required>
                 </div>
@@ -68,6 +68,14 @@
                         <option value="days">Days</option>
                         <option value="weeks">Weeks</option>
                         <option value="months">Months</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <select name="vendor" style="appearance: menulist;" class="form-control mx-auto w-auto">
+                        <option selected disabled>Vendor</option>
+                        {% for vendor in vendors %}
+                            <option value="{{vendor[0]}}">{{vendor[1]}}</option>
+                        {% endfor %}
                     </select>
                 </div>
                 <button class="btn btn-primary" type="submit">Add New Item</button>
