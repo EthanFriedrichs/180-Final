@@ -70,3 +70,4 @@ foreign key (item_id) references items(item_id));
 select * from discounts;
 insert into discounts (discount_expire, discount_percent, item_id) values (now(), 20, 2);
 select discount_id, discount_expire, discount_percent, discounts.item_id from discounts join items on (discounts.item_id = items.item_id) where user_id = 2;
+update discounts set discount_expire = "DATE" where item_id = 2;
