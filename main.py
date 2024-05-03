@@ -593,9 +593,9 @@ def edit_vendor_item():
         hidden_item_id = request.form.get("item_hidden_id")
         hidden_id = request.form.getlist("hidden_id")
         removals = request.form.getlist("removal")
+        new_percent = request.form.get("new_percent")
 
         for i in range(len(request.form.getlist("hidden_id"))):
-            # print(request.form.getlist("hidden_id")[i])
 
             if hidden_id[i] != "none" and removals[i] != "yes":
                 
@@ -643,6 +643,62 @@ def edit_vendor_item():
                 db.execute(text("delete from describer where color_id = :id;"), params)
                 db.commit()
 
+        if new_percent != "":
+            params = {"percent":new_percent, "id":hidden_item_id}
+            db.execute(text("update discounts set discount_percent = :percent where item_id = :id"), params)
+            db.commit()
+
+        form_month = request.form.get("month_input")
+        form_day = request.form.get("day_input")
+        form_year = request.form.get("year_input")
+        form_hour = request.form.get("hour_input")
+        form_minute = request.form.get("minute_input")
+        form_second = request.form.get("second_input")
+        params = {"id":hidden_item_id}
+        discount_original = db.execute(text("select discount_expire from discounts join items on (discounts.item_id = items.item_id) where items.item_id = :id"), params).all()[0][0]
+        final_new_date = ""
+
+        if form_month != "":
+            final_new_date += form_month + "/"
+
+        else:
+            final_new_date += discount_original.strftime("%m") + "/"
+
+        if form_day != "":
+            final_new_date += form_day + "/"
+
+        else:
+            final_new_date += discount_original.strftime("%d") + "/"
+
+        if form_year != "":
+            final_new_date += form_year + " "
+
+        else:
+            final_new_date += discount_original.strftime("%Y") + " "
+
+        if form_hour != "":
+            final_new_date += form_hour + ":"
+
+        else:
+            final_new_date += discount_original.strftime("%H") + ":"
+
+        if form_minute != "":
+            final_new_date += form_minute + ":"
+
+        else:
+            final_new_date += discount_original.strftime("%M") + ":"
+
+        if form_second != "":
+            final_new_date += form_second
+
+        else:
+            final_new_date += discount_original.strftime("%S")
+
+        final_new_date = datetime.strptime(final_new_date, "%m/%d/%Y %H:%M:%S")
+        params = {"new_date":final_new_date, "id":hidden_item_id}
+        db.execute(text("update discounts set discount_expire = :new_date where item_id = :id"), params)
+        db.commit()
+
         params = {"account_num":session["account_num"]}
         items = db.execute(text("select * from items where user_id = :account_num"),params).all()
         params = {"id":session["account_num"]}
@@ -662,47 +718,58 @@ def edit_vendor_item():
 
         expires_in = []
         current_time = datetime.now()
-        ct_month = int(current_time.strftime("%m")) # ct refers to current time
-        ct_day = int(current_time.strftime("%d"))
-        ct_year = int(current_time.strftime("%Y"))
-        ct_hour = int(current_time.strftime("%H"))
-        ct_minute = int(current_time.strftime("%M"))
-        ct_second = int(current_time.strftime("%S"))
+        ct_year = int(current_time.strftime("%Y")) # CT stands for current time
         
-        for i in range(len(discounts)):
+        for i in discounts:
+            difference = datetime.now() - i[1]
+
+            if i[1] < datetime.now():
+
+                if difference >= timedelta(days=365):
+                    expires_in.append([f"This discount is expired by {(difference.days//365)%365}+ year(s).", i[3]])
+
+                elif difference >= timedelta(days=31):
+                    expires_in.append([f"This discount is expired by {(difference.days//31)%31}+ month(s).", i[3]])
+
+                elif difference >= timedelta(weeks=1):
+                    expires_in.append([f"This discount is expired by {(difference.days//7)%7}+ week(s).", i[3]])
+
+                elif difference >= timedelta(days=1):
+                    expires_in.append([f"This discount is expired by {difference.days}+ day(s).", i[3]])
+
+                elif difference >= timedelta(hours=1):
+                    expires_in.append([f"This discount is expired by {difference.seconds//3600}+ hour(s).", i[3]])
+                    
+                elif difference >= timedelta(minutes=1):
+                    expires_in.append([f"This discount is expired by {(difference.seconds//60)%60}+ minute(s).", i[3]])
+                
+                elif difference >= timedelta(seconds=1):
+                    expires_in.append([f"This discount is expired by {difference.seconds}+ second(s).", i[3]])
             
-            if int(formatted_discounts[i][3]) >= ct_year:
-                
-                if int(formatted_discounts[i][1]) >= ct_month:
-
-                    if int(formatted_discounts[i][2]) >= ct_day:
-
-                        if int(formatted_discounts[i][4]) >= ct_hour:
-
-                            if int(formatted_discounts[i][5]) >= ct_minute:
-
-                                if int(formatted_discounts[i][6]) >= ct_second:
-                                    expires_in.append(["Not expired yet.", formatted_discounts[i][8]])
-
-                                else:
-                                    expires_in.append(["Expired " + str(ct_second - int(formatted_discounts[i][6])) + " second(s) ago.",formatted_discounts[i][8]])
-
-                            else:
-                                expires_in.append(["Expired " + str(ct_minute - int(formatted_discounts[i][5])) + " minute(s) ago.",formatted_discounts[i][8]])
-
-                        else:
-                            expires_in.append(["Expired " + str(ct_hour - int(formatted_discounts[i][4])) + " hour(s) ago.",formatted_discounts[i][8]])
-
-                    else:
-                        expires_in.append(["Expired " + str(ct_day - int(formatted_discounts[i][2])) + " day(s) ago.",formatted_discounts[i][8]])
-                
-                else:
-                    expires_in.append(["Expired " + str(ct_month - int(formatted_discounts[i][1])) + " month(s) ago.",formatted_discounts[i][8]])
-
             else:
-                expires_in.append(["Expired " + str(ct_year - int(formatted_discounts[i][3])) + " year(s) ago.",formatted_discounts[i][8]])
+                
+                if difference >= timedelta(days=365):
+                    expires_in.append([f"This discount expires in {(difference.days//365)%365}+ year(s).", i[3]])
 
-        return render_template("edit_item.html", items=items, describers=describers, discounts=discounts)
+                elif difference <= timedelta(days=365):
+                    expires_in.append([f"This discount expires in {(difference.days//31)%31}+ month(s).", i[3]])
+
+                elif difference >= timedelta(days=31):
+                    expires_in.append([f"This discount expires in {(difference.days//7)%7}+ week(s).", i[3]])
+
+                elif difference >= timedelta(weeks=1):
+                    expires_in.append([f"This discount expires in {difference.days}+ days(s).", i[3]])
+
+                elif difference >= timedelta(days=1):
+                    expires_in.append([f"This discount expires in {difference.seconds//3600}+ hours(s).", i[3]])
+
+                elif difference >= timedelta(hours=1):
+                    expires_in.append([f"This discount expires in {(difference.seconds//60)%60}+ minutes(s).", i[3]])
+                    
+                elif difference >= timedelta(minutes=1):
+                    expires_in.append([f"This discount expires in {difference.seconds}+ seconds(s).", i[3]])
+
+        return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year)
     
     else:
         params = {"account_num":session["account_num"]}
@@ -724,47 +791,58 @@ def edit_vendor_item():
 
         expires_in = []
         current_time = datetime.now()
-        ct_month = int(current_time.strftime("%m")) # ct refers to current time
-        ct_day = int(current_time.strftime("%d"))
-        ct_year = int(current_time.strftime("%Y"))
-        ct_hour = int(current_time.strftime("%H"))
-        ct_minute = int(current_time.strftime("%M"))
-        ct_second = int(current_time.strftime("%S"))
+        ct_year = int(current_time.strftime("%Y")) # CT stands for current time
         
-        for i in range(len(discounts)):
+        for i in discounts:
+            difference = datetime.now() - i[1]
+
+            if i[1] < datetime.now():
+
+                if difference >= timedelta(days=365):
+                    expires_in.append([f"This discount is expired by {(difference.days//365)%365}+ year(s).", i[3]])
+
+                elif difference >= timedelta(days=31):
+                    expires_in.append([f"This discount is expired by {(difference.days//31)%31}+ month(s).", i[3]])
+
+                elif difference >= timedelta(weeks=1):
+                    expires_in.append([f"This discount is expired by {(difference.days//7)%7}+ week(s).", i[3]])
+
+                elif difference >= timedelta(days=1):
+                    expires_in.append([f"This discount is expired by {difference.days}+ day(s).", i[3]])
+
+                elif difference >= timedelta(hours=1):
+                    expires_in.append([f"This discount is expired by {difference.seconds//3600}+ hour(s).", i[3]])
+                    
+                elif difference >= timedelta(minutes=1):
+                    expires_in.append([f"This discount is expired by {(difference.seconds//60)%60}+ minute(s).", i[3]])
+                
+                elif difference >= timedelta(seconds=1):
+                    expires_in.append([f"This discount is expired by {difference.seconds}+ second(s).", i[3]])
             
-            if int(formatted_discounts[i][3]) >= ct_year:
-                
-                if int(formatted_discounts[i][1]) >= ct_month:
-
-                    if int(formatted_discounts[i][2]) >= ct_day:
-
-                        if int(formatted_discounts[i][4]) >= ct_hour:
-
-                            if int(formatted_discounts[i][5]) >= ct_minute:
-
-                                if int(formatted_discounts[i][6]) >= ct_second:
-                                    expires_in.append(["Not expired yet.", formatted_discounts[i][8]])
-
-                                else:
-                                    expires_in.append(["Expired " + str(ct_second - int(formatted_discounts[i][6])) + " second(s) ago.",formatted_discounts[i][8]])
-
-                            else:
-                                expires_in.append(["Expired " + str(ct_minute - int(formatted_discounts[i][5])) + " minute(s) ago.",formatted_discounts[i][8]])
-
-                        else:
-                            expires_in.append(["Expired " + str(ct_hour - int(formatted_discounts[i][4])) + " hour(s) ago.",formatted_discounts[i][8]])
-
-                    else:
-                        expires_in.append(["Expired " + str(ct_day - int(formatted_discounts[i][2])) + " day(s) ago.",formatted_discounts[i][8]])
-                
-                else:
-                    expires_in.append(["Expired " + str(ct_month - int(formatted_discounts[i][1])) + " month(s) ago.",formatted_discounts[i][8]])
-
             else:
-                expires_in.append(["Expired " + str(ct_year - int(formatted_discounts[i][3])) + " year(s) ago.",formatted_discounts[i][8]])
+                
+                if difference >= timedelta(days=365):
+                    expires_in.append([f"This discount expires in {(difference.days//365)%365}+ year(s).", i[3]])
 
-        return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in)
+                elif difference <= timedelta(days=365):
+                    expires_in.append([f"This discount expires in {(difference.days//31)%31}+ month(s).", i[3]])
+
+                elif difference >= timedelta(days=31):
+                    expires_in.append([f"This discount expires in {(difference.days//7)%7}+ week(s).", i[3]])
+
+                elif difference >= timedelta(weeks=1):
+                    expires_in.append([f"This discount expires in {difference.days}+ days(s).", i[3]])
+
+                elif difference >= timedelta(days=1):
+                    expires_in.append([f"This discount expires in {difference.seconds//3600}+ hours(s).", i[3]])
+
+                elif difference >= timedelta(hours=1):
+                    expires_in.append([f"This discount expires in {(difference.seconds//60)%60}+ minutes(s).", i[3]])
+                    
+                elif difference >= timedelta(minutes=1):
+                    expires_in.append([f"This discount expires in {difference.seconds}+ seconds(s).", i[3]])
+
+        return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year)
 
 @app.route("/customer/cart", methods=["GET", "POST"])
 @login_required
