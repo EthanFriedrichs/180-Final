@@ -16,6 +16,7 @@
             <div class="shop-item">
                 <input class="hidden_cart_id" value="{{cart_info[4]}}" type="hidden">
                 <span class="shop-item-title">{{cart_info[1]}}</span>
+                <span class="shop-item-title">Color/Size:{{cart_info[9]}}/{{cart_info[10]}}</span>
                 <!-- <img class="shop-item-image">  NEED IMAGES TABLE FIRST--> 
                 <div class="shop-item-details">
                     <span class="shop-item-price">Total: {{"${:,.2f}".format(cart_info[2] * cart_info[6])}}</span>
@@ -38,4 +39,5 @@
     </div>
     {%endif%}
 </section>
+<br>
 {% endblock %}

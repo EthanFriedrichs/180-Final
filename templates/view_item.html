@@ -70,22 +70,29 @@
 
                 <br>
                 
-                {% if reviews != "None" %}
+                {% if reviews|length > 0 %}
                     <span class="shop-item-price">Reviews</span>
                     {% for review in reviews %}
-                        {% if review[2] == product[0] %}
-                            <p class="shop-item-info">Reviewed By: {{review[11]}} at {{review[5]}}</p>
-                            <p class="shop-item-info">Stars: {{review[6]}}</p>
-                            <p class="shop-item-info">Review: {{review[3]}}</p>
-                            <br>
-                        {% endif %}
+                        <p class="shop-item-info">Reviewed By: {{review[3]}} at {{review[1]}}</p>
+                        <p class="shop-item-info">Stars: {{review[2]}}</p>
+                        <p class="shop-item-info">Review: {{review[0]}}</p>
+                        <br>
                     {% endfor %}
                 {% endif %}
                 
                 {% if session["account_type"] == "Customer" %}
-                <form action="/item/{{product[0]}}" method="post">
-                    <button class="btn btn-primary" type="submit">Add to Cart</button>
-                </form>
+                    <form action="/item/{{product[0]}}" method="post">
+                        <div class="mb-3">
+                            <label>Color/Size:</label>
+                            <select name="color_size" style="appearance: menulist;" class="form-control w-auto">
+                                {% for variation in variations %}
+                                    <option value="{{variation[0]}}">{{variation[2]}}/{{variation[1]}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <br>
+                        <button class="btn btn-primary" type="submit">Add to Cart</button>
+                    </form>
                 {% endif %}
             </div>
         </div>
