@@ -241,15 +241,16 @@ def item_page(item_id):
         if not request.form.get("isFilter"):
 
             user_id = session["account_num"]
-            params = {"user_id":user_id, "item_id":item_id}
-            in_cart = db.execute(text("select * from cart where user_id = :user_id and item_id = :item_id"), params).all()
+            variation = request.form.get("color_size")
+            params = {"user_id":user_id, "item_id":item_id, "color_id":variation}
+            in_cart = db.execute(text("select * from cart where user_id = :user_id and item_id = :item_id and color_id = :color_id"), params).all()
             if len(in_cart) > 0:
                 quanitity = in_cart[0][3] + 1
-                params = {"user_id":user_id, "item_id":item_id, "quant":quanitity}
-                db.execute(text("update cart set quantity = :quant where user_id = :user_id and item_id = :item_id"), params)
+                params = {"user_id":user_id, "item_id":item_id, "quant":quanitity, "color_id":variation}
+                db.execute(text("update cart set quantity = :quant where user_id = :user_id and item_id = :item_id and color_id = :color_id"), params)
                 db.commit()
             else:
-                db.execute(text("insert into cart (user_id, item_id, quantity) values (:user_id, :item_id, 1)"), params)
+                db.execute(text("insert into cart (user_id, item_id, quantity, color_id) values (:user_id, :item_id, 1, :color_id)"), params)
                 db.commit()
 
             products = db.execute(text("select * from items order by user_id")).all()
@@ -262,37 +263,40 @@ def item_page(item_id):
             params = {"item_id":item_id}
             product = db.execute(text("select * from items where item_id = :item_id"), params).all()
             users = db.execute(text("select * from users")).all()
-            reviews = db.execute(text("select * from reviews join users on (reviews.user_id = users.user_id)")).all()
+            reviews = db.execute(text("select review_text, time_review, stars, email from reviews join users on (reviews.user_id = users.user_id) where reviews.item_id = :item_id"), params).all()
 
 
 
             if request.form.get("filter") != "N/A":
-                params = {"stars":request.form.get("filter")}
+                params = {"stars":request.form.get("filter"), "item_id":item_id}
 
                 #execute statements where filter is used
                 if request.form.get("sort") == "Ratings":
-                    reviews = db.execute(text("select * from reviews join users on (reviews.user_id = users.user_id) where reviews.stars = :stars order by stars"), params).all()
+                    reviews = db.execute(text("select review_text, time_review, stars, email from reviews join users on (reviews.user_id = users.user_id) where reviews.stars = :stars and reviews.item_id = :item_id order by stars"), params).all()
                 elif request.form.get("sort") == "Time":
-                    reviews = db.execute(text("select * from reviews join users on (reviews.user_id = users.user_id) where reviews.stars = :stars order by time_review"), params).all()
+                    reviews = db.execute(text("select review_text, time_review, stars, email from reviews join users on (reviews.user_id = users.user_id) where reviews.stars = :stars and reviews.item_id = :item_id order by time_review"), params).all()
                 else:
-                    reviews = db.execute(text("select * from reviews join users on (reviews.user_id = users.user_id) where reviews.stars = :stars"), params).all()
+                    reviews = db.execute(text("select review_text, time_review, stars, email from reviews join users on (reviews.user_id = users.user_id) where reviews.stars = :stars and reviews.item_id = :item_id"), params).all()
 
             else:
                 #execute statements where filter is not used
                 if request.form.get("sort") == "Ratings":
-                    reviews = db.execute(text("select * from reviews join users on (reviews.user_id = users.user_id) order by stars"), params).all()
+                    reviews = db.execute(text("select review_text, time_review, stars, email from reviews join users on (reviews.user_id = users.user_id) where reviews.item_id = :item_id order by stars"), params).all()
                 elif request.form.get("sort") == "Time":
-                    reviews = db.execute(text("select * from reviews join users on (reviews.user_id = users.user_id) order by time_review"), params).all()
+                    reviews = db.execute(text("select review_text, time_review, stars, email from reviews join users on (reviews.user_id = users.user_id) where reviews.item_id = :item_id order by time_review"), params).all()
             
-            return render_template("view_item.html", product=product[0], users=users, reviews=reviews)
+            variations = db.execute(text("select * from describer where item_id = :item_id"), params).all()
+            discounts = db.execute(text("select * from discounts")).all()
+            return render_template("view_item.html", product=product[0], users=users, reviews=reviews, discounts=discounts, variations=variations)
         
     else:
         params = {"item_id":item_id}
         product = db.execute(text("select * from items where item_id = :item_id"), params).all()
-        reviews = db.execute(text("select * from reviews join users on (reviews.user_id = users.user_id)")).all()
+        reviews = db.execute(text("select review_text, time_review, stars, email from reviews join users on (reviews.user_id = users.user_id) where reviews.item_id = :item_id"), params).all()
+        variations = db.execute(text("select * from describer where item_id = :item_id"), params).all()
         discounts = db.execute(text("select * from discounts")).all()
         users = db.execute(text("select * from users")).all()
-        return render_template("view_item.html", product=product[0], users=users, reviews=reviews, discounts=discounts)
+        return render_template("view_item.html", product=product[0], users=users, reviews=reviews, discounts=discounts, variations=variations)
     
 
 @app.route("/reviews", methods=["GET", "POST"])
@@ -850,7 +854,7 @@ def cart():
     if request.method == "POST":
         date_ordered = datetime.now()
         params = {"id":session["account_num"]}
-        current_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) where cart.user_id = :id;"), params).all()
+        current_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color_id from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = :id;"), params).all()
         # Adds to order and then removes the cart items via their cart_id
         params = {"date_ordered":date_ordered, "id":session["account_num"], "status":"Pending"}
         db.execute(text("insert into orders (date_ordered, user_id, order_status) values (:date_ordered, :id, :status)"), params)
@@ -858,8 +862,8 @@ def cart():
         for i in range(len(current_info)):
             params = {"id":session["account_num"]}
             order_id = db.execute(text("select * from orders where user_id = :id order by order_id desc;"), params).all()
-            params = {"id":order_id[0][0], "price":current_info[i][2], "quantity":current_info[i][6], "name":current_info[i][1], "item_id":current_info[i][0]}
-            db.execute(text("insert into order_items (order_id, price, quantity, item_name, item_id) values (:id, :price, :quantity, :name, :item_id)"), params)
+            params = {"id":order_id[0][0], "price":current_info[i][2], "quantity":current_info[i][6], "name":current_info[i][1], "item_id":current_info[i][0], "color_id":current_info[i][9]}
+            db.execute(text("insert into order_items (order_id, price, quantity, item_name, item_id, color_id) values (:id, :price, :quantity, :name, :item_id, :color_id)"), params)
             db.commit()
             params = {"id":current_info[i][4]}
             db.execute(text("delete from cart where cart_id = :id"), params)
@@ -867,7 +871,7 @@ def cart():
         return redirect("/customer/order")
     else:
         params = {"id":session["account_num"]}
-        cart_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) where cart.user_id = :id;"), params).all()
+        cart_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color, describer.size from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = :id;"), params).all()
         if (len(cart_info) < 1):
             cart_info = "None"
         return render_template("cart.html", cart_info=cart_info)
@@ -879,7 +883,7 @@ def orders():
     orders = db.execute(text("select * from orders where user_id = :id"), params).all()
     if (len(orders) > 0):
         params = {"id":session["account_num"]}
-        order_info = db.execute(text("select * from orders join order_items on (orders.order_id = order_items.order_id) where user_id = :id"), params).all()
+        order_info = db.execute(text("select * from orders join order_items on (orders.order_id = order_items.order_id) join describer on (order_items.color_id = describer.color_id) where user_id = :id"), params).all()
         totals = []
         for i in range(len(orders)):
             added = 0

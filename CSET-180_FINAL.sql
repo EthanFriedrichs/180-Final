@@ -30,9 +30,10 @@ create table images (image_url varchar(255) primary key);
 select * from images;
 
 drop table cart;
-create table cart (cart_id int primary key auto_increment, user_id int, item_id int, quantity int,
+create table cart (cart_id int primary key auto_increment, user_id int, item_id int, quantity int, color_id int,
 foreign key (user_id) references users(user_id),
-foreign key (item_id) references items(item_id));
+foreign key (item_id) references items(item_id),
+foreign key (color_id) references describer(color_id));
 select * from cart;
 insert into cart (user_id, item_id, quantity) values (3, 4, 2), (3, 2, 12);
 select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id);
@@ -58,11 +59,12 @@ select * from orders;
 select orders.order_id, date_ordered, orders.user_id, order_status, ordered_item_id, price, quantity, item_name from orders join order_items on (orders.order_id = order_items.order_id) where user_id = 3;
 
 drop table order_items;
-create table order_items (ordered_item_id int primary key auto_increment, order_id int, price float, quantity int, item_name varchar(255), item_id int not null,
+create table order_items (ordered_item_id int primary key auto_increment, order_id int, price float, quantity int, item_name varchar(255), item_id int not null, color_id int,
 foreign key (order_id) references orders(order_id),
-foreign key (item_id) references items(item_id));
+foreign key (item_id) references items(item_id),
+foreign key (color_id) references describer(color_id));
 select * from order_items;
-
+select * from orders join order_items on (orders.order_id = order_items.order_id) join describer on (order_items.color_id = describer.color_id) where user_id = 3;
 
 drop table discounts;
 create table discounts (discount_id int primary key auto_increment, discount_expire datetime not null, discount_percent int not null, item_id int,
