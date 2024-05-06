@@ -11,6 +11,7 @@ drop table items;
 create table items (item_id int primary key auto_increment, item_name varchar(255), price float, in_stock int, user_id int, warranty_length int, descript varchar(255),
 foreign key (user_id) references users(user_id));
 select * from items;
+select max(item_id) from items;
 insert into items (item_name, price, in_stock, user_id, warranty_length, descript) values 
 ("example item A", 1.50, 20, 2, 365, "Item A"),
 ("example item B", 3.00, 12, 2, 11, "Item B"),
