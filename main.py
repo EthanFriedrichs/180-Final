@@ -351,7 +351,7 @@ def admin_add():
             db.execute(text("insert into items (item_name, price, in_stock, user_id, warranty_length, descript) values (:name, :price, :stock, :user, :warranty, :desc)"), params)
             db.commit()
 
-            curr_items = db.execute(text("select * from items")).all()
+            curr_items = db.execute(text("select max(item_id) from items")).all()
             for i in range(len(color)):
                 curr_color = color[i]
                 curr_size = size[i]
@@ -360,7 +360,7 @@ def admin_add():
                 if curr_size == "":
                     curr_size = "N/A"
                 if (curr_color != "N/A") and (curr_size != "N/A"):
-                    params = {"size":curr_size, "color":curr_color, "id":len(curr_items)}
+                    params = {"size":curr_size, "color":curr_color, "id":curr_items[0][0]}
                     db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :id)"), params)
                     db.commit()
 
@@ -368,31 +368,31 @@ def admin_add():
                 current_date = datetime.now()
                 if dis_time_type == "minutes":
                     discount_expire = current_date + timedelta(seconds=int(dis_length) * 60)
-                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":curr_items[0][0]}
                     db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                     db.commit()
                 elif dis_time_type == "hours":
                     discount_expire = current_date + timedelta(hours=int(dis_length))
-                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":curr_items[0][0]}
                     db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                     db.commit()
                 elif dis_time_type == "days":
                     discount_expire = current_date + timedelta(days=int(dis_length))
-                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":curr_items[0][0]}
                     db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                     db.commit()
                 elif dis_time_type == "weeks":
                     discount_expire = current_date + timedelta(weeks=int(dis_length))
-                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":curr_items[0][0]}
                     db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                     db.commit()
                 elif dis_time_type == "months":
                     discount_expire = current_date + timedelta(days=int(dis_length) * 31)
-                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":curr_items[0][0]}
                     db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                     db.commit()
             else:
-                params = {"expire":datetime.now(), "percent":0, "id":len(curr_items)}
+                params = {"expire":datetime.now(), "percent":0, "id":curr_items[0][0]}
                 db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                 db.commit()
         else:
@@ -403,15 +403,6 @@ def admin_add():
     else:
         vendors = db.execute(text("select user_id, username from users where user_type = 'Vendor'")).all()
         return render_template("admin_add_item.html", vendors=vendors)
-
-@app.route("/admin/edit", methods=["GET", "POST"])
-@login_required
-@admin_page
-def admin_edit():
-    if request.method == "POST":
-        return apology("TO DO")
-    else:
-        return apology("TO DO")
 
 @app.route("/admin/delete", methods=["GET", "POST"])
 @login_required
@@ -438,7 +429,296 @@ def admin_delete():
         users = db.execute(text("select user_id, username from users")).all()
         return render_template("admin_delete.html", products=products, users=users)
 
+@app.route("/admin/edit", methods=["GET", "POST"])
+@login_required
+@vendor_page
+def admin_edit():
+    if request.method == "POST":
+        items = db.execute(text("select * from items")).all()
 
+        name = request.form.get("new_name")
+        price = request.form.get("new_price")
+        stock = request.form.get("new_stock")
+        warranty = request.form.get("new_warranty")
+        desc = request.form.get("new_desc")
+        
+        if (name != "" and items[0][1] != name):
+            params = {"new_name":name, "name":items[0][1], "account_num":session["account_num"]}
+            db.execute(text("update items set item_name = :new_name where item_name = :name and user_id = :account_num"), params)
+            db.commit()
+        
+        if (price != "" and items[0][2] != price):
+            params = {"new_price":price, "name":items[0][1], "account_num":session["account_num"]}
+            db.execute(text("update items set price = :new_price where item_name = :name and user_id = :account_num"), params)
+            db.commit()
+
+        if (stock != "" and items[0][3] != price):
+            params = {"new_stock":stock, "name":items[0][1], "account_num":session["account_num"]}
+            db.execute(text("update items set in_stock = :new_stock where item_name = :name and user_id = :account_num"), params)
+            db.commit()
+
+        if (warranty != "" and items[0][5] != warranty):
+            params = {"new_warranty":warranty, "name":items[0][1], "account_num":session["account_num"]}
+            db.execute(text("update items set warranty_length = :new_warranty where item_name = :name and user_id = :account_num"), params)
+            db.commit()
+
+        if (desc != "" and items[0][6] != desc):
+            params = {"new_desc":desc, "name":items[0][1], "account_num":session["account_num"]}
+            db.execute(text("update items set descript = :new_desc where item_name = :name and user_id = :account_num"), params)
+            db.commit()
+
+        new_size = request.form.getlist("new_size")
+        new_color = request.form.getlist("new_color")
+        hidden_item_id = request.form.get("item_hidden_id")
+        hidden_id = request.form.getlist("hidden_id")
+        removals = request.form.getlist("removal")
+        new_percent = request.form.get("new_percent")
+
+        for i in range(len(request.form.getlist("hidden_id"))):
+
+            if hidden_id[i] != "none" and removals[i] != "yes":
+                
+                if new_size[i] != "":
+                    if new_color[i] != "":
+                        # print("Changing size and color:", new_size[i], "/", new_color[i], "| for color id:", request.form.getlist("hidden_id")[i])
+                        params = {"size":new_size[i], "color":new_color[i], "id":request.form.getlist("hidden_id")[i]}
+                        db.execute(text("update describer set size = :size, color = :color where color_id = :id"), params)
+                        db.commit()
+                    else:
+                        # print("Changing only size:", new_size[i], "/ N/A | for color id:", request.form.getlist("hidden_id")[i])
+                        params = {"size":new_size[i], "id":request.form.getlist("hidden_id")[i]}
+                        db.execute(text("update describer set size = :size where color_id = :id"), params)
+                        db.commit()
+                
+                elif new_color[i] != "" and new_size[i] == "":
+                    # print("Changing only color: N/A /", new_color[i], "| for color id:", request.form.getlist("hidden_id")[i])
+                    params = {"color":new_color[i], "id":request.form.getlist("hidden_id")[i]}
+                    db.execute(text("update describer set color = :color where color_id = :id"), params)
+                    db.commit()
+
+            elif hidden_id[i] == "none" and removals[i] != "yes":
+                
+                if new_size[i] != "":
+                    if new_color[i] != "":
+                        # print("Changing new element size and color:", new_size[i], "/", new_color[i], "| ADD TO DATABASE")
+                        params = {"size":new_size[i], "color":new_color[i], "item_id":hidden_item_id}
+                        db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :item_id)"), params)
+                        db.commit()
+                    else:
+                        # print("Changing new element size:", new_size[i], "/ N/A | ADD TO DATABASE")
+                        params = {"size":new_size[i], "color":"N/A", "item_id":hidden_item_id}
+                        db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :item_id)"), params)
+                        db.commit()
+                
+                elif new_color[i] != "" and new_size[i] == "":
+                    # print("Changing new element color: N/A /", new_color[i], "| ADD TO DATABASE")
+                    params = {"size":"N/A", "color":new_color[i], "item_id":hidden_item_id}
+                    db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :item_id)"), params)
+                    db.commit()
+
+            elif hidden_id[i] != "none" and removals[i] == "yes":
+                # print("Removing color id:", request.form.getlist("hidden_id")[i])
+                params = {"id":request.form.getlist("hidden_id")[i]}
+                db.execute(text("delete from describer where color_id = :id;"), params)
+                db.commit()
+
+        if new_percent != "":
+            params = {"percent":new_percent, "id":hidden_item_id}
+            db.execute(text("update discounts set discount_percent = :percent where item_id = :id"), params)
+            db.commit()
+
+        form_month = request.form.get("month_input")
+        form_day = request.form.get("day_input")
+        form_year = request.form.get("year_input")
+        form_hour = request.form.get("hour_input")
+        form_minute = request.form.get("minute_input")
+        form_second = request.form.get("second_input")
+        params = {"id":hidden_item_id}
+        discount_original = db.execute(text("select discount_expire from discounts join items on (discounts.item_id = items.item_id) where items.item_id = :id"), params).all()[0][0]
+        final_new_date = ""
+
+        if form_month != "":
+            final_new_date += form_month + "/"
+
+        else:
+            final_new_date += discount_original.strftime("%m") + "/"
+
+        if form_day != "":
+            final_new_date += form_day + "/"
+
+        else:
+            final_new_date += discount_original.strftime("%d") + "/"
+
+        if form_year != "":
+            final_new_date += form_year + " "
+
+        else:
+            final_new_date += discount_original.strftime("%Y") + " "
+
+        if form_hour != "":
+            final_new_date += form_hour + ":"
+
+        else:
+            final_new_date += discount_original.strftime("%H") + ":"
+
+        if form_minute != "":
+            final_new_date += form_minute + ":"
+
+        else:
+            final_new_date += discount_original.strftime("%M") + ":"
+
+        if form_second != "":
+            final_new_date += form_second
+
+        else:
+            final_new_date += discount_original.strftime("%S")
+
+        final_new_date = datetime.strptime(final_new_date, "%m/%d/%Y %H:%M:%S")
+        params = {"new_date":final_new_date, "id":hidden_item_id}
+        db.execute(text("update discounts set discount_expire = :new_date where item_id = :id"), params)
+        db.commit()
+
+        params = {"account_num":session["account_num"]}
+        items = db.execute(text("select * from items where user_id = :account_num"),params).all()
+        params = {"id":session["account_num"]}
+        describers = db.execute(text("select color_id, size, color, category, describer.item_id from describer join items on (describer.item_id = items.item_id) where user_id = :id"), params).all()
+        params = {"id":session["account_num"]}
+        discounts = db.execute(text("select discount_id, discount_expire, discount_percent, discounts.item_id from discounts join items on (discounts.item_id = items.item_id) where user_id = :id"), params).all()
+        formatted_discounts = []
+
+        for i in discounts:
+            day = i[1].strftime("%d")
+            month = i[1].strftime("%m")
+            year = i[1].strftime("%Y")
+            second = i[1].strftime("%S")
+            minute = i[1].strftime("%M")
+            hour = i[1].strftime("%H")
+            formatted_discounts.append([i[0], month, day, year, hour, minute, second, i[2], i[3]])
+
+        expires_in = []
+        current_time = datetime.now()
+        ct_year = int(current_time.strftime("%Y")) # CT stands for current time
+        
+        for i in discounts:
+            difference = datetime.now() - i[1]
+
+            if i[1] < datetime.now():
+
+                if difference >= timedelta(days=365):
+                    expires_in.append([f"This discount is expired by {(difference.days//365)%365}+ year(s).", i[3]])
+
+                elif difference >= timedelta(days=31):
+                    expires_in.append([f"This discount is expired by {(difference.days//31)%31}+ month(s).", i[3]])
+
+                elif difference >= timedelta(weeks=1):
+                    expires_in.append([f"This discount is expired by {(difference.days//7)%7}+ week(s).", i[3]])
+
+                elif difference >= timedelta(days=1):
+                    expires_in.append([f"This discount is expired by {difference.days}+ day(s).", i[3]])
+
+                elif difference >= timedelta(hours=1):
+                    expires_in.append([f"This discount is expired by {difference.seconds//3600}+ hour(s).", i[3]])
+                    
+                elif difference >= timedelta(minutes=1):
+                    expires_in.append([f"This discount is expired by {(difference.seconds//60)%60}+ minute(s).", i[3]])
+                
+                elif difference >= timedelta(seconds=1):
+                    expires_in.append([f"This discount is expired by {difference.seconds}+ second(s).", i[3]])
+            
+            else:
+                
+                if difference >= timedelta(days=365):
+                    expires_in.append([f"This discount expires in {(difference.days//365)%365}+ year(s).", i[3]])
+
+                elif difference <= timedelta(days=365):
+                    expires_in.append([f"This discount expires in {(difference.days//31)%31}+ month(s).", i[3]])
+
+                elif difference >= timedelta(days=31):
+                    expires_in.append([f"This discount expires in {(difference.days//7)%7}+ week(s).", i[3]])
+
+                elif difference >= timedelta(weeks=1):
+                    expires_in.append([f"This discount expires in {difference.days}+ days(s).", i[3]])
+
+                elif difference >= timedelta(days=1):
+                    expires_in.append([f"This discount expires in {difference.seconds//3600}+ hours(s).", i[3]])
+
+                elif difference >= timedelta(hours=1):
+                    expires_in.append([f"This discount expires in {(difference.seconds//60)%60}+ minutes(s).", i[3]])
+                    
+                elif difference >= timedelta(minutes=1):
+                    expires_in.append([f"This discount expires in {difference.seconds}+ seconds(s).", i[3]])
+
+        return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year)
+    
+    else:
+        items = db.execute(text("select * from items")).all()
+        describers = db.execute(text("select color_id, size, color, category, describer.item_id from describer join items on (describer.item_id = items.item_id)")).all()
+        discounts = db.execute(text("select discount_id, discount_expire, discount_percent, discounts.item_id from discounts join items on (discounts.item_id = items.item_id)")).all()
+        formatted_discounts = []
+
+        for i in discounts:
+            day = i[1].strftime("%d")
+            month = i[1].strftime("%m")
+            year = i[1].strftime("%Y")
+            second = i[1].strftime("%S")
+            minute = i[1].strftime("%M")
+            hour = i[1].strftime("%H")
+            formatted_discounts.append([i[0], month, day, year, hour, minute, second, i[2], i[3]])
+
+        expires_in = []
+        current_time = datetime.now()
+        ct_year = int(current_time.strftime("%Y")) # CT stands for current time
+        
+        for i in discounts:
+            difference = datetime.now() - i[1]
+
+            if i[1] < datetime.now():
+
+                if difference >= timedelta(days=365):
+                    expires_in.append([f"This discount is expired by {(difference.days//365)%365}+ year(s).", i[3]])
+
+                elif difference >= timedelta(days=31):
+                    expires_in.append([f"This discount is expired by {(difference.days//31)%31}+ month(s).", i[3]])
+
+                elif difference >= timedelta(weeks=1):
+                    expires_in.append([f"This discount is expired by {(difference.days//7)%7}+ week(s).", i[3]])
+
+                elif difference >= timedelta(days=1):
+                    expires_in.append([f"This discount is expired by {difference.days}+ day(s).", i[3]])
+
+                elif difference >= timedelta(hours=1):
+                    expires_in.append([f"This discount is expired by {difference.seconds//3600}+ hour(s).", i[3]])
+                    
+                elif difference >= timedelta(minutes=1):
+                    expires_in.append([f"This discount is expired by {(difference.seconds//60)%60}+ minute(s).", i[3]])
+                
+                elif difference >= timedelta(seconds=1):
+                    expires_in.append([f"This discount is expired by {difference.seconds}+ second(s).", i[3]])
+            
+            else:
+                
+                if difference >= timedelta(days=365):
+                    expires_in.append([f"This discount expires in {(difference.days//365)%365}+ year(s).", i[3]])
+
+                elif difference <= timedelta(days=365):
+                    expires_in.append([f"This discount expires in {(difference.days//31)%31}+ month(s).", i[3]])
+
+                elif difference >= timedelta(days=31):
+                    expires_in.append([f"This discount expires in {(difference.days//7)%7}+ week(s).", i[3]])
+
+                elif difference >= timedelta(weeks=1):
+                    expires_in.append([f"This discount expires in {difference.days}+ days(s).", i[3]])
+
+                elif difference >= timedelta(days=1):
+                    expires_in.append([f"This discount expires in {difference.seconds//3600}+ hours(s).", i[3]])
+
+                elif difference >= timedelta(hours=1):
+                    expires_in.append([f"This discount expires in {(difference.seconds//60)%60}+ minutes(s).", i[3]])
+                    
+                elif difference >= timedelta(minutes=1):
+                    expires_in.append([f"This discount expires in {difference.seconds}+ seconds(s).", i[3]])
+
+        return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year)
 
 # vendor routes
 @app.route("/vendor", methods=["GET", "POST"])
@@ -476,7 +756,7 @@ def add_item():
             db.execute(text("insert into items (item_name, price, in_stock, user_id, warranty_length, descript) values (:name, :price, :stock, :user, :warranty, :desc)"), params)
             db.commit()
 
-            curr_items = db.execute(text("select * from items")).all()
+            curr_items = db.execute(text("select max(item_id) from items")).all()
             for i in range(len(color)):
                 curr_color = color[i]
                 curr_size = size[i]
@@ -485,7 +765,7 @@ def add_item():
                 if curr_size == "":
                     curr_size = "N/A"
                 if (curr_color != "N/A") and (curr_size != "N/A"):
-                    params = {"size":curr_size, "color":curr_color, "category":category, "id":len(curr_items)}
+                    params = {"size":curr_size, "color":curr_color, "category":category, "id":curr_items[0][0]}
                     db.execute(text("insert into describer (size, color, category, item_id) values (:size, :color, :category, :id)"), params)
                     db.commit()
 
@@ -493,37 +773,37 @@ def add_item():
                 current_date = datetime.now()
                 if dis_time_type == "minutes":
                     discount_expire = current_date + timedelta(seconds=int(dis_length) * 60)
-                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":curr_items[0][0]}
                     db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                     db.commit()
                 elif dis_time_type == "hours":
                     discount_expire = current_date + timedelta(hours=int(dis_length))
-                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":curr_items[0][0]}
                     db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                     db.commit()
                 elif dis_time_type == "days":
                     discount_expire = current_date + timedelta(days=int(dis_length))
-                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":curr_items[0][0]}
                     db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                     db.commit()
                 elif dis_time_type == "weeks":
                     discount_expire = current_date + timedelta(weeks=int(dis_length))
-                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":curr_items[0][0]}
                     db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                     db.commit()
                 elif dis_time_type == "months":
                     discount_expire = current_date + timedelta(days=int(dis_length) * 31)
-                    params = {"expire":discount_expire, "percent":dis_percent, "id":len(curr_items)}
+                    params = {"expire":discount_expire, "percent":dis_percent, "id":curr_items[0][0]}
                     db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                     db.commit()
             else:
-                params = {"expire":datetime.now(), "percent":0, "id":len(curr_items)}
+                params = {"expire":datetime.now(), "percent":0, "id":curr_items[0][0]}
                 db.execute(text("insert into discounts (discount_expire, discount_percent, item_id) values (:expire, :percent, :id)"), params)
                 db.commit()
 
         else:
             return apology("Item already exists")
-
+        
         return render_template("add_item.html")
     else:
         return render_template("add_item.html")
@@ -845,6 +1125,11 @@ def edit_vendor_item():
                     
                 elif difference >= timedelta(minutes=1):
                     expires_in.append([f"This discount expires in {difference.seconds}+ seconds(s).", i[3]])
+
+        print(items)
+        print(describers)
+        print(discounts)
+        print(expires_in)
 
         return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year)
 
