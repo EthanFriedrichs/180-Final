@@ -11,28 +11,40 @@
 <section class="container content-section">
 
     {%if cart_info != "None"%}
-    {% for cart_info in cart_info %}
-        <div class="shop-items-0">
-            <div class="shop-item">
-                <input class="hidden_cart_id" value="{{cart_info[4]}}" type="hidden">
-                <span class="shop-item-title">{{cart_info[1]}}</span>
-                <span class="shop-item-title">Color/Size:{{cart_info[9]}}/{{cart_info[10]}}</span>
-                <!-- <img class="shop-item-image">  NEED IMAGES TABLE FIRST--> 
-                <div class="shop-item-details">
-                    <span class="shop-item-price">Total: {{"${:,.2f}".format(cart_info[2] * cart_info[6])}}</span>
-                </div>
-                <div class="shop-item-details2">
-                    <p class="shop-item-info">Amount in cart: {{cart_info[6]}}</p>
-                    <p class="shop-item-info">Sold by: {{cart_info[7]}}</p>
+        {% for cart_info in cart_info %}
+            <div class="shop-items-0">
+                <div class="shop-item">
+                    <input class="hidden_cart_id" value="{{cart_info[4]}}" type="hidden">
+                    <span class="shop-item-title">{{cart_info[1]}}</span>
+                    <span class="shop-item-title">Color/Size:{{cart_info[9]}}/{{cart_info[10]}}</span>
+                    <!-- <img class="shop-item-image">  NEED IMAGES TABLE FIRST--> 
+                    <div class="shop-item-details">
+                        <span class="shop-item-price">Total: {{"${:,.2f}".format(cart_info[2] * cart_info[6])}}</span>
+                    </div>
+                    <div class="shop-item-details2">
+                        <p class="shop-item-info">Amount in cart: {{cart_info[6]}}</p>
+                        <div class = "mb-3">
+                            <form action="/cart" method="post">
+                                <input type="hidden" name="item_id" value="{{cart_info[0]}}">
+                                <input type="number" name="quant" value = {{cart_info[6]}} class="form-control mx-auto">
+                                <br>
+                                <button class="btn btn-primary" type="submit">Update Quantity</button>
+                            </form>
+                        </div>
+                        <p class="shop-item-info">Sold by: {{cart_info[7]}}</p>
+                        <form action="/cart/delete" method="post">
+                            <input type="hidden" name="item_id" value="{{cart_info[0]}}">
+                            <button class="btn btn-danger" type="submit">Remove From Cart</button>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
-    {% endfor %}
-    <form action="/customer/cart" method="post" class="">
-        <div class = "edit-div">
-                <button id = "color" class="large-btn" type="submit">Place order</button>
-        </div>
-    </form>
+        {% endfor %}
+        <form action="/customer/cart" method="post" class="">
+            <div class = "edit-div">
+                    <button id = "color" class="large-btn" type="submit">Place order</button>
+            </div>
+        </form>
     {%else%}
     <div class="container content-section no-items">
         <h2>You have no items in your cart.</h2>
