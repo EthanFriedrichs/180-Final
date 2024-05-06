@@ -427,7 +427,7 @@ def admin_delete():
 
 @app.route("/admin/edit", methods=["GET", "POST"])
 @login_required
-@vendor_page
+@admin_page
 def admin_edit():
     if request.method == "POST":
         items = db.execute(text("select * from items")).all()
@@ -1075,6 +1075,7 @@ def edit_vendor_item():
         
         for i in discounts:
             difference = datetime.now() - i[1]
+            negative_difference = i[1] - datetime.now()
 
             if i[1] < datetime.now():
 
@@ -1101,31 +1102,26 @@ def edit_vendor_item():
             
             else:
                 
-                if difference >= timedelta(days=365):
-                    expires_in.append([f"This discount expires in {(difference.days//365)%365}+ year(s).", i[3]])
+                if negative_difference >= timedelta(days=365):
+                    expires_in.append([f"This discount expires in {(negative_difference.days//365)%365}+ year(s).", i[3]])
 
-                elif difference <= timedelta(days=365):
-                    expires_in.append([f"This discount expires in {(difference.days//31)%31}+ month(s).", i[3]])
+                elif negative_difference >= timedelta(days=365):
+                    expires_in.append([f"This discount expires in {(negative_difference.days//31)%31}+ month(s).", i[3]])
 
-                elif difference >= timedelta(days=31):
-                    expires_in.append([f"This discount expires in {(difference.days//7)%7}+ week(s).", i[3]])
+                elif negative_difference >= timedelta(days=31):
+                    expires_in.append([f"This discount expires in {(negative_difference.days//7)%7}+ week(s).", i[3]])
 
-                elif difference >= timedelta(weeks=1):
-                    expires_in.append([f"This discount expires in {difference.days}+ days(s).", i[3]])
+                elif negative_difference >= timedelta(weeks=1):
+                    expires_in.append([f"This discount expires in {negative_difference.days}+ days(s).", i[3]])
 
-                elif difference >= timedelta(days=1):
-                    expires_in.append([f"This discount expires in {difference.seconds//3600}+ hours(s).", i[3]])
+                elif negative_difference >= timedelta(days=1):
+                    expires_in.append([f"This discount expires in {negative_difference.seconds//3600}+ hours(s).", i[3]])
 
-                elif difference >= timedelta(hours=1):
-                    expires_in.append([f"This discount expires in {(difference.seconds//60)%60}+ minutes(s).", i[3]])
+                elif negative_difference >= timedelta(hours=1):
+                    expires_in.append([f"This discount expires in {(negative_difference.seconds//60)%60}+ minutes(s).", i[3]])
                     
-                elif difference >= timedelta(minutes=1):
-                    expires_in.append([f"This discount expires in {difference.seconds}+ seconds(s).", i[3]])
-
-        print(items)
-        print(describers)
-        print(discounts)
-        print(expires_in)
+                elif negative_difference >= timedelta(minutes=1):
+                    expires_in.append([f"This discount expires in {negative_difference.seconds}+ seconds(s).", i[3]])
 
         return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year)
 
