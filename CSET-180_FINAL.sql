@@ -53,14 +53,14 @@ foreign key (item_id) references items(item_id));
 select * from reviews;
 
 drop table orders;
-create table orders (order_id int primary key auto_increment, date_ordered datetime not null, user_id int, order_status varchar(10) not null,
+create table orders (order_id int primary key auto_increment, date_ordered datetime not null, user_id int, order_status varchar(25) not null,
 foreign key (user_id) references users(user_id));
 select * from orders;
 
 select orders.order_id, date_ordered, orders.user_id, order_status, ordered_item_id, price, quantity, item_name from orders join order_items on (orders.order_id = order_items.order_id) where user_id = 3;
 
 drop table order_items;
-create table order_items (ordered_item_id int primary key auto_increment, order_id int, price float, quantity int, item_name varchar(255), item_id int not null, color_id int,
+create table order_items (ordered_item_id int primary key auto_increment, order_id int, price float, quantity int, item_name varchar(255), item_id int not null, color_id int, order_status varchar(25),
 foreign key (order_id) references orders(order_id),
 foreign key (item_id) references items(item_id),
 foreign key (color_id) references describer(color_id));
