@@ -75,7 +75,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection string is in the format mysql://user:password@server/database
-conn_str = "mysql://root:ethanpoe125@localhost/customers_2"
+conn_str = "mysql://root:Just5fun!@localhost/customers_2"
 engine = create_engine(conn_str) # echo=True tells you if connection is successful or not
 db = engine.connect()
 
@@ -847,6 +847,38 @@ def edit_vendor_item():
                     expires_in.append([f"This discount expires in {difference.seconds}+ seconds(s).", i[3]])
 
         return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year)
+
+
+@app.route("/vendor/order", methods=["GET", "POST"])
+@login_required
+def confirm_orders():
+    if request.method == "POST":
+        params = {"order_id":request.form.get("order_id"), "ordered_item_id":request.form.get("order_item_id")}
+        db.execute(text("update order_items set order_status = 'Confirmed' where ordered_item_id = :ordered_item_id"), params)
+        db.commit()
+
+        #check all items in order and set overall order status
+        check_orders = db.execute(text("select order_status from order_items where order_id = :order_id"), params).all()
+        flag = True
+
+        for order in check_orders:
+            if order[0] == "Pending":
+                flag = False
+        
+        if flag:
+            db.execute(text("update orders set order_status = 'Confirmed'"))
+            db.commit()
+
+       
+        params = {"user_id":session["account_num"]}
+        orders = db.execute(text("select order_items.ordered_item_id, order_items.order_id, order_items.price, order_items.quantity, order_items.item_name, describer.size, describer.color from order_items join items on (order_items.item_id = items.item_id) join describer on (order_items.color_id = describer.color_id) where items.user_id = :user_id and order_items.order_status = 'Pending'"), params).all()
+        return render_template("vendor_order.html", orders=orders)
+
+    else:
+        params = {"user_id":session["account_num"]}
+        orders = db.execute(text("select order_items.ordered_item_id, order_items.order_id, order_items.price, order_items.quantity, order_items.item_name, describer.size, describer.color from order_items join items on (order_items.item_id = items.item_id) join describer on (order_items.color_id = describer.color_id) where items.user_id = :user_id and order_items.order_status = 'Pending'"), params).all()
+        return render_template("vendor_order.html", orders=orders)
+    
 
 @app.route("/customer/cart", methods=["GET", "POST"])
 @login_required
