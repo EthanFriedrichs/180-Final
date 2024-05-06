@@ -1191,6 +1191,7 @@ def cart():
         cart_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color, describer.size from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = :id;"), params).all()
         if (len(cart_info) < 1):
             cart_info = "None"
+        print(cart_info)
         return render_template("cart.html", cart_info=cart_info)
     
 @app.route("/customer/order")
@@ -1213,6 +1214,32 @@ def orders():
     
     else:
         return render_template("order.html", orders="None", order_info="None", totals="None")
+    
+@app.route("/cart", methods=["GET", "POST"])
+@login_required
+def update_cart():
+    params = {"user_id":session["account_num"], "item_id":request.form.get("item_id"), "quantity":request.form.get("quant")}
+    db.execute(text("update cart set quantity = :quantity where user_id = :user_id and item_id = :item_id"), params)
+    db.commit()
+
+    params = {"id":session["account_num"]}
+    cart_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color, describer.size from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = :id;"), params).all()
+    if (len(cart_info) < 1):
+        cart_info = "None"
+    return render_template("cart.html", cart_info=cart_info)
+
+@app.route("/cart/delete", methods=["GET", "POST"])
+@login_required
+def delete_cart():
+    params = {"user_id":session["account_num"], "item_id":request.form.get("item_id")}
+    db.execute(text("delete from cart where user_id = :user_id and item_id = :item_id"), params)
+    db.commit()
+
+    params = {"id":session["account_num"]}
+    cart_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color, describer.size from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = :id;"), params).all()
+    if (len(cart_info) < 1):
+        cart_info = "None"
+    return render_template("cart.html", cart_info=cart_info)
 
 def apology(message, code=400):
     def escape(s):
