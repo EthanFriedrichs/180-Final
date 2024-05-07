@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    My Complaints
+{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="../static/view.css">
+
+    <div style="min-height: 75vh; display:flex; align-items:center content-section">
+        <div class="container py-5 text-center">
+            {%for i in range(complaints|length)%}
+            <form action="/admin/complaint_view" method="post">
+                <h1>Complaint {{i + 1}}:</h1>
+                <div class="complaint-div">
+                    <p>Complaint type: {{complaints[i][5]}}</p>
+                    <p>Title: {{complaints[i][4]}}</p>
+                    <p>Complaint:</p>
+                    <p>"{{complaints[i][6]}}"</p>
+                    <p>Made on: {{complaints[i][3]}}</p>
+                    <p>Review status: {{complaints[i][7]}}</p>
+                </div>
+                <button class="base-btn add-btn" name="button" value="Confirmed by vendor">ACCEPT</button>
+                <button class="base-btn remove-btn" name="button" value="Rejected by vendor">REJECT</button>
+            </form>
+            {%endfor%}
+        </div>
+    </div>
+{% endblock %}

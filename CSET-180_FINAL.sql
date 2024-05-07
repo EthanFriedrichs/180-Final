@@ -16,6 +16,7 @@ insert into items (item_name, price, in_stock, user_id, warranty_length, descrip
 ("example item A", 1.50, 20, 2, 365, "Item A"),
 ("example item B", 3.00, 12, 2, 11, "Item B"),
 ("example item C", 12.75, 5, 2, 240, "Item C");
+select * from items where item_name like "%ebay%";
 
 
 drop tables describer;
@@ -42,10 +43,11 @@ select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantit
 -- items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username
 
 drop table complaints;
-create table complaints (complaint_id int primary key auto_increment, item_id int, time_date date not null, title varchar(20) not null, item_desc varchar(255) not null, demand varchar(14) not null, image_url varchar(255),
+create table complaints (complaint_id int primary key auto_increment, item_id int, user_id int, time_date date not null, title varchar(50), reason_type varchar(20) not null, reason varchar(255) not null, review_status varchar(50) default "Not yet reviewed",
 foreign key (item_id) references items(item_id),
-foreign key (image_url) references images(image_url));
+foreign key (user_id) references users(user_id));
 select * from complaints;
+update complaints set review_status = "Not yet reviewed";
 
 drop table reviews;
 create table reviews (review_id int primary key auto_increment, user_id int, item_id int, review_text varchar(255) not null, accept_reject varchar(6), time_review datetime, stars float not null, image blob,
@@ -57,6 +59,7 @@ drop table orders;
 create table orders (order_id int primary key auto_increment, date_ordered datetime not null, user_id int, order_status varchar(26) not null,
 foreign key (user_id) references users(user_id));
 select * from orders;
+update orders set order_status = "Shipped";
 
 
 drop table order_items;

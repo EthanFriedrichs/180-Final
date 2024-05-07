@@ -37,6 +37,9 @@
                   <button class="barItem input" style="margin-left:10px;">
                     <a href="/admin/edit">Edit Items</a>
                   </button>
+                  <button class="barItem input" style="margin-left:10px;">
+                    <a href="/admin/complaint_view">Review Complaints</a>
+                  </button>
                   {% endif %}
 
                   {% if session["account_type"] == "Vendor" %}
@@ -61,6 +64,9 @@
                   <button class="barItem input" style="margin-left:10px;">
                     <a href="/vendor/ship">Ship Orders</a>
                   </button>
+                  <button class="barItem input" style="margin-left:10px;">
+                    <a href="/vendor/complaint_view">Review Complaints</a>
+                  </button>
                   {% endif %}
 
                   {% if session["account_type"] == "Customer" %}
@@ -72,6 +78,12 @@
                   </button>
                   <button class="barItem input" style="margin-left:10px;">
                     <a href="/reviews">Review</a>
+                  </button>
+                  <button class="barItem input" style="margin-left:10px;">
+                    <a href="/customer/complaint_make">New Complaint</a>
+                  </button>
+                  <button class="barItem input" style="margin-left:10px;">
+                    <a href="/customer/complaint_view">My Complaints</a>
                   </button>
                   {% endif %}
                   
