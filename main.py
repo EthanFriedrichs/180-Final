@@ -1164,6 +1164,66 @@ def confirm_orders():
         orders = db.execute(text("select order_items.ordered_item_id, order_items.order_id, order_items.price, order_items.quantity, order_items.item_name, describer.size, describer.color from order_items join items on (order_items.item_id = items.item_id) join describer on (order_items.color_id = describer.color_id) where items.user_id = :user_id and order_items.order_status = 'Pending'"), params).all()
         return render_template("vendor_order.html", orders=orders)
     
+@app.route("/vendor/delivery", methods=["GET", "POST"])
+@login_required
+def delivery_orders():
+    if request.method == "POST":
+        params = {"order_id":request.form.get("order_id"), "ordered_item_id":request.form.get("order_item_id")}
+        db.execute(text("update order_items set order_status = 'Handed to Delivery Partner' where ordered_item_id = :ordered_item_id"), params)
+        db.commit()
+
+        #check all items in order and set overall order status
+        check_orders = db.execute(text("select order_status from order_items where order_id = :order_id"), params).all()
+        flag = True
+
+        for order in check_orders:
+            if order[0] == "Confirmed":
+                flag = False
+        
+        if flag:
+            db.execute(text("update orders set order_status = 'Handed to Delivery Partner'"))
+            db.commit()
+
+       
+        params = {"user_id":session["account_num"]}
+        orders = db.execute(text("select order_items.ordered_item_id, order_items.order_id, order_items.price, order_items.quantity, order_items.item_name, describer.size, describer.color from order_items join items on (order_items.item_id = items.item_id) join describer on (order_items.color_id = describer.color_id) join orders on (orders.order_id = order_items.order_id) where items.user_id = :user_id and orders.order_status = 'Confirmed' and order_items.order_status = 'Confirmed'"), params).all()
+        return render_template("vendor_deliver.html", orders=orders)
+
+    else:
+        params = {"user_id":session["account_num"]}
+        orders = db.execute(text("select order_items.ordered_item_id, order_items.order_id, order_items.price, order_items.quantity, order_items.item_name, describer.size, describer.color from order_items join items on (order_items.item_id = items.item_id) join describer on (order_items.color_id = describer.color_id) join orders on (orders.order_id = order_items.order_id) where items.user_id = :user_id and orders.order_status = 'Confirmed' and order_items.order_status = 'Confirmed'"), params).all()
+        return render_template("vendor_deliver.html", orders=orders)
+    
+@app.route("/vendor/ship", methods=["GET", "POST"])
+@login_required
+def ship_orders():
+    if request.method == "POST":
+        params = {"order_id":request.form.get("order_id"), "ordered_item_id":request.form.get("order_item_id")}
+        db.execute(text("update order_items set order_status = 'Shipped' where ordered_item_id = :ordered_item_id"), params)
+        db.commit()
+
+        #check all items in order and set overall order status
+        check_orders = db.execute(text("select order_status from order_items where order_id = :order_id"), params).all()
+        flag = True
+
+        for order in check_orders:
+            if order[0] == "Handed to Delivery Partner":
+                flag = False
+        
+        if flag:
+            db.execute(text("update orders set order_status = 'Shipped'"))
+            db.commit()
+
+       
+        params = {"user_id":session["account_num"]}
+        orders = db.execute(text("select order_items.ordered_item_id, order_items.order_id, order_items.price, order_items.quantity, order_items.item_name, describer.size, describer.color from order_items join items on (order_items.item_id = items.item_id) join describer on (order_items.color_id = describer.color_id) join orders on (orders.order_id = order_items.order_id) where items.user_id = :user_id and orders.order_status = 'Handed to Delivery Partner' and order_items.order_status = 'Handed to Delivery Partner'"), params).all()
+        return render_template("vendor_ship.html", orders=orders)
+
+    else:
+        params = {"user_id":session["account_num"]}
+        orders = db.execute(text("select order_items.ordered_item_id, order_items.order_id, order_items.price, order_items.quantity, order_items.item_name, describer.size, describer.color from order_items join items on (order_items.item_id = items.item_id) join describer on (order_items.color_id = describer.color_id) join orders on (orders.order_id = order_items.order_id) where items.user_id = :user_id and orders.order_status = 'Handed to Delivery Partner' and order_items.order_status = 'Handed to Delivery Partner'"), params).all()
+        return render_template("vendor_ship.html", orders=orders)
+    
 
 @app.route("/customer/cart", methods=["GET", "POST"])
 @login_required
@@ -1192,6 +1252,7 @@ def cart():
         cart_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color, describer.size from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = :id;"), params).all()
         if (len(cart_info) < 1):
             cart_info = "None"
+        print(cart_info)
         return render_template("cart.html", cart_info=cart_info)
     
 @app.route("/customer/order")
@@ -1199,7 +1260,7 @@ def cart():
 @customer_page
 def orders():
     params = {"id":session["account_num"]}
-    orders = db.execute(text("select * from orders where user_id = :id"), params).all()
+    orders = db.execute(text("select * from orders where user_id = :id order by date_ordered desc"), params).all()
     if (len(orders) > 0):
         params = {"id":session["account_num"]}
         order_info = db.execute(text("select * from orders join order_items on (orders.order_id = order_items.order_id) join describer on (order_items.color_id = describer.color_id) where user_id = :id"), params).all()
@@ -1215,6 +1276,32 @@ def orders():
     
     else:
         return render_template("order.html", orders="None", order_info="None", totals="None")
+    
+@app.route("/cart", methods=["GET", "POST"])
+@login_required
+def update_cart():
+    params = {"user_id":session["account_num"], "item_id":request.form.get("item_id"), "quantity":request.form.get("quant")}
+    db.execute(text("update cart set quantity = :quantity where user_id = :user_id and item_id = :item_id"), params)
+    db.commit()
+
+    params = {"id":session["account_num"]}
+    cart_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color, describer.size from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = :id;"), params).all()
+    if (len(cart_info) < 1):
+        cart_info = "None"
+    return render_template("cart.html", cart_info=cart_info)
+
+@app.route("/cart/delete", methods=["GET", "POST"])
+@login_required
+def delete_cart():
+    params = {"user_id":session["account_num"], "item_id":request.form.get("item_id")}
+    db.execute(text("delete from cart where user_id = :user_id and item_id = :item_id"), params)
+    db.commit()
+
+    params = {"id":session["account_num"]}
+    cart_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color, describer.size from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = :id;"), params).all()
+    if (len(cart_info) < 1):
+        cart_info = "None"
+    return render_template("cart.html", cart_info=cart_info)
 
 @app.route("/customer/complaint_make", methods=["GET", "POST"])
 @login_required

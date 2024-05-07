@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+
+{% block title %}
+    My Orders
+{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="../static/order.css">
+
+<section class="container content-section">
+    {%if orders|length > 0%}
+        {% for order in orders %}
+            <div class="shop-items-0">
+                <div class="shop-item">
+                    <span class="shop-item-title">{{order[4]}}</span>
+                    <!-- <img class="shop-item-image">  NEED IMAGES TABLE FIRST--> 
+                    <div class="shop-item-details">
+                        <span class="shop-item-price">Quantity: {{order[3]}}</span>
+                    </div>
+                    <div class="shop-item-details">
+                        <span class="shop-item-price">Total: {{"${:,.2f}".format(order[2])}}</span>
+                    </div>
+
+                    <div class="shop-item-details2">
+                        <p class="shop-item-info">{{order[5]}}/{{order[6]}}</p>
+                    </div>
+                    <form method="post" action="/vendor/delivery">
+                        <input type="hidden" name="order_item_id" value="{{order[0]}}">
+                        <input type="hidden" name="order_id" value="{{order[1]}}">
+                        <button class="btn btn-primary" type="submit">Hand to delivery partner</button>
+                    </form>
+                </div>
+            </div>
+            
+        {% endfor %}
+    {%else%}
+        <div class="container content-section no-items">
+            <h2>You have no confirmed orders</h2>
+        </div>
+    {%endif%}
+</section>
+{% endblock %}
