@@ -17,6 +17,7 @@ insert into items (item_name, price, in_stock, user_id, warranty_length, descrip
 ("example item B", 3.00, 12, 2, 11, "Item B"),
 ("example item C", 12.75, 5, 2, 240, "Item C");
 
+
 drop tables describer;
 create table describer (color_id int primary key auto_increment, size varchar(255), color varchar(255), category varchar(255), item_id int,
 foreign key (item_id) references items(item_id));
@@ -53,19 +54,17 @@ foreign key (item_id) references items(item_id));
 select * from reviews;
 
 drop table orders;
-create table orders (order_id int primary key auto_increment, date_ordered datetime not null, user_id int, order_status varchar(25) not null,
+create table orders (order_id int primary key auto_increment, date_ordered datetime not null, user_id int, order_status varchar(26) not null,
 foreign key (user_id) references users(user_id));
 select * from orders;
 
-select orders.order_id, date_ordered, orders.user_id, order_status, ordered_item_id, price, quantity, item_name from orders join order_items on (orders.order_id = order_items.order_id) where user_id = 3;
 
 drop table order_items;
-create table order_items (ordered_item_id int primary key auto_increment, order_id int, price float, quantity int, item_name varchar(255), item_id int not null, color_id int, order_status varchar(25),
+create table order_items (ordered_item_id int primary key auto_increment, order_id int, price float, quantity int, item_name varchar(255), item_id int not null, color_id int, order_status varchar(26),
 foreign key (order_id) references orders(order_id),
 foreign key (item_id) references items(item_id),
 foreign key (color_id) references describer(color_id));
 select * from order_items;
-select * from orders join order_items on (orders.order_id = order_items.order_id) join describer on (order_items.color_id = describer.color_id) where user_id = 3;
 
 drop table discounts;
 create table discounts (discount_id int primary key auto_increment, discount_expire datetime not null, discount_percent int not null, item_id int,
