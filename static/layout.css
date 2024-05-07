@@ -373,3 +373,14 @@ color:black;
 .discount-div {
     margin-bottom: 15px;
 }
+
+.complaint-div{
+    background-color: rgba(173, 216, 230, 0.7);
+    border-radius: 5px;
+    margin: 20px;
+    padding: 10px;
+}
+
+.complaint-div p{
+    font-size: 20px;
+}

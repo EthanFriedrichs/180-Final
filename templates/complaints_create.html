@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Make New Complaint
+{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="../static/view.css">
+
+    <div style="min-height: 75vh; display:flex; align-items:center content-section">
+        <div class="container py-5 text-center">
+            <h1>Write a new complaint</h1>
+            <form action="/customer/complaint_make" method="post">
+                <h1 style="color: red;">{{warning}}</h1>
+                <select name="complaint_item" class="add-select" style="margin-bottom: 10px;">
+                    {%for i in search_results%}
+                    <option value="{{i[7]}}">{{i[6]}}</option>
+                    {%endfor%}
+                </select>
+                <select name="complaint_reason" class="add-select" style="margin-bottom: 10px;">
+                    <option value="return">Return</option>
+                    <option value="refund">Refund</option>
+                    <option value="warranty">Warranty</option>
+                    <option value="other">Other</option>
+                </select>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="title" placeholder="Title" type="text">
+                    <textarea class="form-control mx-auto w-auto" style="height: 300px; margin-top: 2%;" name="reason" placeholder="Why you are unhappy with your purchase?" type="text"></textarea>
+                </div>
+                <button class="btn btn-primary" type="submit">Make New Complaint</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

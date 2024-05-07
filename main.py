@@ -75,7 +75,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection string is in the format mysql://user:password@server/database
-conn_str = "mysql://root:Just5fun!@localhost/customers_2"
+conn_str = "mysql://root:ethanpoe125@localhost/customers_2"
 engine = create_engine(conn_str) # echo=True tells you if connection is successful or not
 db = engine.connect()
 
@@ -601,6 +601,7 @@ def admin_edit():
         
         for i in discounts:
             difference = datetime.now() - i[1]
+            negative_difference = i[1] - datetime.now()
 
             if i[1] < datetime.now():
 
@@ -627,26 +628,26 @@ def admin_edit():
             
             else:
                 
-                if difference >= timedelta(days=365):
-                    expires_in.append([f"This discount expires in {(difference.days//365)%365}+ year(s).", i[3]])
+                if negative_difference >= timedelta(days=365):
+                    expires_in.append([f"This discount expires in {(negative_difference.days//365)%365}+ year(s).", i[3]])
 
-                elif difference <= timedelta(days=365):
-                    expires_in.append([f"This discount expires in {(difference.days//31)%31}+ month(s).", i[3]])
+                elif negative_difference >= timedelta(days=31):
+                    expires_in.append([f"This discount expires in {(negative_difference.days//31)%31}+ month(s).", i[3]])
 
-                elif difference >= timedelta(days=31):
-                    expires_in.append([f"This discount expires in {(difference.days//7)%7}+ week(s).", i[3]])
+                elif negative_difference >= timedelta(weeks=1):
+                    expires_in.append([f"This discount expires in {(negative_difference.days//7)%7}+ week(s).", i[3]])
 
-                elif difference >= timedelta(weeks=1):
-                    expires_in.append([f"This discount expires in {difference.days}+ days(s).", i[3]])
+                elif negative_difference >= timedelta(days=1):
+                    expires_in.append([f"This discount expires in {negative_difference.days}+ days(s).", i[3]])
 
-                elif difference >= timedelta(days=1):
-                    expires_in.append([f"This discount expires in {difference.seconds//3600}+ hours(s).", i[3]])
+                elif negative_difference >= timedelta(hours=1):
+                    expires_in.append([f"This discount expires in {negative_difference.seconds//3600}+ hours(s).", i[3]])
 
-                elif difference >= timedelta(hours=1):
-                    expires_in.append([f"This discount expires in {(difference.seconds//60)%60}+ minutes(s).", i[3]])
+                elif negative_difference >= timedelta(minutes=1):
+                    expires_in.append([f"This discount expires in {(negative_difference.seconds//60)%60}+ minutes(s).", i[3]])
                     
-                elif difference >= timedelta(minutes=1):
-                    expires_in.append([f"This discount expires in {difference.seconds}+ seconds(s).", i[3]])
+                elif negative_difference >= timedelta(seconds=1):
+                    expires_in.append([f"This discount expires in {negative_difference.seconds}+ seconds(s).", i[3]])
 
         return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year)
     
@@ -671,6 +672,7 @@ def admin_edit():
         
         for i in discounts:
             difference = datetime.now() - i[1]
+            negative_difference = i[1] - datetime.now()
 
             if i[1] < datetime.now():
 
@@ -697,26 +699,26 @@ def admin_edit():
             
             else:
                 
-                if difference >= timedelta(days=365):
-                    expires_in.append([f"This discount expires in {(difference.days//365)%365}+ year(s).", i[3]])
+                if negative_difference >= timedelta(days=365):
+                    expires_in.append([f"This discount expires in {(negative_difference.days//365)%365}+ year(s).", i[3]])
 
-                elif difference <= timedelta(days=365):
-                    expires_in.append([f"This discount expires in {(difference.days//31)%31}+ month(s).", i[3]])
+                elif negative_difference >= timedelta(days=31):
+                    expires_in.append([f"This discount expires in {(negative_difference.days//31)%31}+ month(s).", i[3]])
 
-                elif difference >= timedelta(days=31):
-                    expires_in.append([f"This discount expires in {(difference.days//7)%7}+ week(s).", i[3]])
+                elif negative_difference >= timedelta(weeks=1):
+                    expires_in.append([f"This discount expires in {(negative_difference.days//7)%7}+ week(s).", i[3]])
 
-                elif difference >= timedelta(weeks=1):
-                    expires_in.append([f"This discount expires in {difference.days}+ days(s).", i[3]])
+                elif negative_difference >= timedelta(days=1):
+                    expires_in.append([f"This discount expires in {negative_difference.days}+ days(s).", i[3]])
 
-                elif difference >= timedelta(days=1):
-                    expires_in.append([f"This discount expires in {difference.seconds//3600}+ hours(s).", i[3]])
+                elif negative_difference >= timedelta(hours=1):
+                    expires_in.append([f"This discount expires in {negative_difference.seconds//3600}+ hours(s).", i[3]])
 
-                elif difference >= timedelta(hours=1):
-                    expires_in.append([f"This discount expires in {(difference.seconds//60)%60}+ minutes(s).", i[3]])
+                elif negative_difference >= timedelta(minutes=1):
+                    expires_in.append([f"This discount expires in {(negative_difference.seconds//60)%60}+ minutes(s).", i[3]])
                     
-                elif difference >= timedelta(minutes=1):
-                    expires_in.append([f"This discount expires in {difference.seconds}+ seconds(s).", i[3]])
+                elif negative_difference >= timedelta(seconds=1):
+                    expires_in.append([f"This discount expires in {negative_difference.seconds}+ seconds(s).", i[3]])
 
         return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year)
 
@@ -1006,6 +1008,7 @@ def edit_vendor_item():
         
         for i in discounts:
             difference = datetime.now() - i[1]
+            negative_difference = i[1] - datetime.now()
 
             if i[1] < datetime.now():
 
@@ -1032,26 +1035,26 @@ def edit_vendor_item():
             
             else:
                 
-                if difference >= timedelta(days=365):
-                    expires_in.append([f"This discount expires in {(difference.days//365)%365}+ year(s).", i[3]])
+                if negative_difference >= timedelta(days=365):
+                    expires_in.append([f"This discount expires in {(negative_difference.days//365)%365}+ year(s).", i[3]])
 
-                elif difference <= timedelta(days=365):
-                    expires_in.append([f"This discount expires in {(difference.days//31)%31}+ month(s).", i[3]])
+                elif negative_difference >= timedelta(days=31):
+                    expires_in.append([f"This discount expires in {(negative_difference.days//31)%31}+ month(s).", i[3]])
 
-                elif difference >= timedelta(days=31):
-                    expires_in.append([f"This discount expires in {(difference.days//7)%7}+ week(s).", i[3]])
+                elif negative_difference >= timedelta(weeks=1):
+                    expires_in.append([f"This discount expires in {(negative_difference.days//7)%7}+ week(s).", i[3]])
 
-                elif difference >= timedelta(weeks=1):
-                    expires_in.append([f"This discount expires in {difference.days}+ days(s).", i[3]])
+                elif negative_difference >= timedelta(days=1):
+                    expires_in.append([f"This discount expires in {negative_difference.days}+ days(s).", i[3]])
 
-                elif difference >= timedelta(days=1):
-                    expires_in.append([f"This discount expires in {difference.seconds//3600}+ hours(s).", i[3]])
+                elif negative_difference >= timedelta(hours=1):
+                    expires_in.append([f"This discount expires in {negative_difference.seconds//3600}+ hours(s).", i[3]])
 
-                elif difference >= timedelta(hours=1):
-                    expires_in.append([f"This discount expires in {(difference.seconds//60)%60}+ minutes(s).", i[3]])
+                elif negative_difference >= timedelta(minutes=1):
+                    expires_in.append([f"This discount expires in {(negative_difference.seconds//60)%60}+ minutes(s).", i[3]])
                     
-                elif difference >= timedelta(minutes=1):
-                    expires_in.append([f"This discount expires in {difference.seconds}+ seconds(s).", i[3]])
+                elif negative_difference >= timedelta(seconds=1):
+                    expires_in.append([f"This discount expires in {negative_difference.seconds}+ seconds(s).", i[3]])
 
         return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year)
     
@@ -1109,22 +1112,22 @@ def edit_vendor_item():
                 if negative_difference >= timedelta(days=365):
                     expires_in.append([f"This discount expires in {(negative_difference.days//365)%365}+ year(s).", i[3]])
 
-                elif negative_difference >= timedelta(days=365):
+                elif negative_difference >= timedelta(days=31):
                     expires_in.append([f"This discount expires in {(negative_difference.days//31)%31}+ month(s).", i[3]])
 
-                elif negative_difference >= timedelta(days=31):
+                elif negative_difference >= timedelta(weeks=1):
                     expires_in.append([f"This discount expires in {(negative_difference.days//7)%7}+ week(s).", i[3]])
 
-                elif negative_difference >= timedelta(weeks=1):
+                elif negative_difference >= timedelta(days=1):
                     expires_in.append([f"This discount expires in {negative_difference.days}+ days(s).", i[3]])
 
-                elif negative_difference >= timedelta(days=1):
+                elif negative_difference >= timedelta(hours=1):
                     expires_in.append([f"This discount expires in {negative_difference.seconds//3600}+ hours(s).", i[3]])
 
-                elif negative_difference >= timedelta(hours=1):
+                elif negative_difference >= timedelta(minutes=1):
                     expires_in.append([f"This discount expires in {(negative_difference.seconds//60)%60}+ minutes(s).", i[3]])
                     
-                elif negative_difference >= timedelta(minutes=1):
+                elif negative_difference >= timedelta(seconds=1):
                     expires_in.append([f"This discount expires in {negative_difference.seconds}+ seconds(s).", i[3]])
 
         return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year)
@@ -1132,6 +1135,7 @@ def edit_vendor_item():
 
 @app.route("/vendor/order", methods=["GET", "POST"])
 @login_required
+@vendor_page
 def confirm_orders():
     if request.method == "POST":
         params = {"order_id":request.form.get("order_id"), "ordered_item_id":request.form.get("order_item_id")}
@@ -1163,6 +1167,7 @@ def confirm_orders():
 
 @app.route("/customer/cart", methods=["GET", "POST"])
 @login_required
+@customer_page
 def cart():
     if request.method == "POST":
         date_ordered = datetime.now()
@@ -1175,8 +1180,8 @@ def cart():
         for i in range(len(current_info)):
             params = {"id":session["account_num"]}
             order_id = db.execute(text("select * from orders where user_id = :id order by order_id desc;"), params).all()
-            params = {"id":order_id[0][0], "price":current_info[i][2], "quantity":current_info[i][6], "name":current_info[i][1], "item_id":current_info[i][0], "color_id":current_info[i][9]}
-            db.execute(text("insert into order_items (order_id, price, quantity, item_name, item_id, color_id) values (:id, :price, :quantity, :name, :item_id, :color_id)"), params)
+            params = {"id":order_id[0][0], "price":current_info[i][2], "quantity":current_info[i][6], "name":current_info[i][1], "item_id":current_info[i][0], "color_id":current_info[i][9], "status":"Pending"}
+            db.execute(text("insert into order_items (order_id, price, quantity, item_name, item_id, color_id, order_status) values (:id, :price, :quantity, :name, :item_id, :color_id, :status)"), params)
             db.commit()
             params = {"id":current_info[i][4]}
             db.execute(text("delete from cart where cart_id = :id"), params)
@@ -1191,6 +1196,7 @@ def cart():
     
 @app.route("/customer/order")
 @login_required
+@customer_page
 def orders():
     params = {"id":session["account_num"]}
     orders = db.execute(text("select * from orders where user_id = :id"), params).all()
@@ -1209,6 +1215,81 @@ def orders():
     
     else:
         return render_template("order.html", orders="None", order_info="None", totals="None")
+
+@app.route("/customer/complaint_make", methods=["GET", "POST"])
+@login_required
+@customer_page
+def customer_complain():
+    warning = ""
+    
+    if request.method == "POST":
+        item = request.form.get("complaint_item")
+        reason_type = request.form.get("complaint_reason")
+        reason = request.form.get("reason")
+        title = request.form.get("title")
+        params = {"id":session["account_num"], "item_id":item}
+        current_complaints = db.execute(text("select * from complaints where user_id = :id and item_id = :item_id"), params).all()
+        if len(current_complaints) < 1:
+            params = {"item_id":item, "user_id":session["account_num"], "time_date":datetime.now(), "title":title, "reason_type":reason_type, "reason":reason}
+            db.execute(text("insert into complaints (item_id, user_id, time_date, title, reason_type, reason) values (:item_id, :user_id, :time_date, :title, :reason_type, :reason)"), params)
+            db.commit()
+        else:
+            warning = "Complaint already exists!"
+        params = {"id":session["account_num"], "status":"Shipped"}
+        search_results = db.execute(text("select orders.order_id, user_id, orders.order_status, ordered_item_id, price, quantity, item_name, order_items.item_id, order_items.order_status, describer.color_id, size, color, category from orders join order_items on (orders.order_id = order_items.order_id) join describer on (order_items.color_id = describer.color_id) where user_id = :id and orders.order_status = :status"), params).all()
+        return(render_template("complaints_create.html", search_results=search_results, warning=warning))
+    
+    else:
+        params = {"id":session["account_num"], "status":"Shipped"}
+        search_results = db.execute(text("select orders.order_id, user_id, orders.order_status, ordered_item_id, price, quantity, item_name, order_items.item_id, order_items.order_status, describer.color_id, size, color, category from orders join order_items on (orders.order_id = order_items.order_id) join describer on (order_items.color_id = describer.color_id) where user_id = :id and orders.order_status = :status"), params).all()
+        return(render_template("complaints_create.html", search_results=search_results, warning=warning))
+    
+@app.route("/customer/complaint_view")
+@login_required
+@customer_page
+def customer_view_complaints():
+    params = {"id":session["account_num"]}
+    complaints = db.execute(text("select * from complaints where user_id = :id"), params).all()
+    print(complaints)
+    return render_template("my_complaints.html", complaints=complaints)
+
+@app.route("/admin/complaint_view", methods=["GET", "POST"])
+@login_required
+@admin_page
+def admin_complaints():
+    if request.method == "POST":
+        button = request.form.get("button")
+        params = {"button":button}
+        db.execute(text("update complaints set review_status = :button"), params)
+        db.commit()
+
+        params = {"status":"Not yet reviewed"}
+        complaints = db.execute(text("select * from complaints where review_status = :status"), params).all()
+        return render_template("admin_complaints.html", complaints=complaints)
+        
+    else:
+        params = {"status":"Not yet reviewed"}
+        complaints = db.execute(text("select * from complaints where review_status = :status"), params).all()
+        return render_template("admin_complaints.html", complaints=complaints)
+    
+@app.route("/vendor/complaint_view", methods=["GET", "POST"])
+@login_required
+@vendor_page
+def vendor_complaints():
+    if request.method == "POST":
+        button = request.form.get("button")
+        params = {"button":button}
+        db.execute(text("update complaints set review_status = :button"), params)
+        db.commit()
+
+        params = {"status":"Processing"}
+        complaints = db.execute(text("select * from complaints where review_status = :status"), params).all()
+        return render_template("vendor_complaints.html", complaints=complaints)
+        
+    else:
+        params = {"status":"Processing"}
+        complaints = db.execute(text("select * from complaints where review_status = :status"), params).all()
+        return render_template("vendor_complaints.html", complaints=complaints)
 
 def apology(message, code=400):
     def escape(s):
