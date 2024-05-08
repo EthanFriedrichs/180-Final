@@ -7,6 +7,11 @@ create table users (user_id int primary key auto_increment, email varchar(255), 
 select * from users;
 update users set user_type = "Admin" where user_id = 1;
 
+drop table addresses;
+create table addresses (address_id int primary key auto_increment, user_id int, default_address varchar(3), reciever varchar(30), contact_number varchar(15), address_line_1 varchar(255), address_line_2 varchar(255), city varchar(20), state varchar(2), zip varchar(5));
+select * from addresses;
+
+
 drop table items;
 create table items (item_id int primary key auto_increment, item_name varchar(255), price float, in_stock int, user_id int, warranty_length int, descript varchar(255),
 foreign key (user_id) references users(user_id));
