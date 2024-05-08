@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+
+{% block title %}
+    View Items
+{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="../static/view.css">
+
+<section class="container content-section">
+    <span class="shop-item-title">Delete Addreses</span>
+    <div class="shop-item-title">
+        <p class="shop-item-info">You cannont delete your default address</p>
+    </div>
+
+    {% for address in addresses %}
+        <div class="shop-items-0">
+            <div class="shop-item">
+                <div class="shop-item-details2">
+                    {% if address[2] == "No" %}
+                        <p class="shop-item-info">Reciever: {{address[3]}}</p>
+                        <p class="shop-item-info">Contact Number: {{address[4]}}</p>
+                        <p class="shop-item-info">Address Line 1: {{address[5]}}</p>
+                        <p class="shop-item-info">Address Line 2: {{address[6]}}</p>
+                        <p class="shop-item-info">City: {{address[7]}}</p>
+                        <p class="shop-item-info">State: {{address[8]}}</p>
+                        <p class="shop-item-info">Zip: {{address[9]}}</p>
+                        <form action="/my_account/delete" method="post">
+                            <input type="hidden" name="address_id" value="{{address[0]}}">
+                            <button class="btn btn-danger delete-button" type="Submit">Delete Address</button>
+                        </form>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</section>
+{% endblock %}

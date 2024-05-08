@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Edit items
+{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="../static/view.css">
+<br>
+<section class="container content-section" style="padding-bottom: 15px; padding-top: 15px;">
+    <h2>You can't edit your default address here</h2>
+    <br>
+    {%for address in addresses%}
+        <h3>{{address[5]}}</h3>
+        <form action="/my_account/edit" method="post">
+            <input class="form-control mx-auto w-auto" name="address_id" value="{{address[0]}}" type="hidden">
+            <div class = "edit-div">
+                <p class = "p-center">Reciever:</p>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="reciever" value="{{address[3]}}" type="text">
+                </div>
+            </div>
+            <div class = "edit-div">
+                <p class = "p-center">Contact Number:</p>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="contact_number" value="{{address[4]}}" type="text">
+                </div>
+            </div>
+            <div class = "edit-div">
+                <p class = "p-center">Address Line 1:</p>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="address_1" value="{{address[5]}}" type="text">
+                </div>
+            </div>
+            <div class = "edit-div">
+                <p class = "p-center">Address Line 2:</p>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="address_2" value="{{address[6]}}" type="text">
+                </div>
+            </div>
+            <div class = "edit-div">
+                <p class = "p-center">City:</p>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="city" value="{{address[7]}}" type="text">
+                </div>
+            </div>
+            <div class = "edit-div">
+                <p class = "p-center">State:</p>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="state" value="{{address[8]}}" type="text">
+                </div>
+            </div>
+            <div class = "edit-div">
+                <p class = "p-center">Zip Code:</p>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="zip" value="{{address[9]}}" type="text">
+                </div>
+            </div>
+            <div class = "edit-div">
+                <label for="scales" style="padding-right: 5px;">Set Default Address:</label>
+                <input type="checkbox" id="scales" name="default_address">
+            </div>
+            <br>
+            <div class = "edit-div">
+                <div class="mb-3">
+                    <button class="btn btn-primary" type="submit">Update</button>                
+                </div>
+            </div>
+
+        </form>
+        <br>
+        <br>
+    {%endfor%}
+</section>
+<br>
+
+
+{% endblock %}

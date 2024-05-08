@@ -182,6 +182,7 @@ def logout():
     session.clear()
     return render_template("index.html")
 
+#account routes
 @app.route("/my_account", methods=["Get", "POST"])
 @login_required
 def my_account():
@@ -189,6 +190,100 @@ def my_account():
     params = {"user_id":user_id}
     info = db.execute(text("select * from users where user_id = :user_id"), params).all()
     return render_template("account.html", info=info[0])
+
+@app.route("/my_account/add", methods=["Get", "POST"])
+@login_required
+@customer_page
+def add_address():
+
+
+    if request.method == "POST":
+        reciever = request.form.get("reciever")
+        contact = request.form.get("contact_number")
+        address1 = request.form.get("address_1")
+        address2 = request.form.get("address_2")
+        city = request.form.get("city")
+        zip = request.form.get("zip")
+        state = request.form.get("state")
+        is_default = False
+        
+        if not reciever or not contact or not address1 or not address2 or not city or not zip or not state:
+            return apology("Missing info")
+
+        if request.form.get("default_address"):
+            is_default = True
+
+        params={"user_id":session["account_num"], "reciever":reciever, "contact":contact, "address1":address1, "address2":address2, "city":city, "zip":zip, "state":state}
+
+        if is_default or len(db.execute(text("select * from addresses where user_id = :user_id and default_address = 'Yes'"), params).all()) == 0:
+            db.execute(text("update addresses set default_address = 'No' where user_id = :user_id"), params)
+            db.commit()
+            db.execute(text("insert into addresses (user_id, default_address, reciever, contact_number, address_line_1, address_line_2, city, state, zip) values (:user_id, 'Yes', :reciever, :contact, :address1, :address2, :city, :state, :zip)"), params)
+            db.commit()
+        else:
+            db.execute(text("insert into addresses (user_id, default_address, reciever, contact_number, address_line_1, address_line_2, city, state, zip) values (:user_id, 'No', :reciever, :contact, :address1, :address2, :city, :state, :zip)"), params)
+            db.commit()
+
+    
+        return render_template("add_address.html")
+    else:
+        return render_template("add_address.html")
+    
+@app.route("/my_account/delete", methods=["Get", "POST"])
+@login_required
+@customer_page
+def delete_address():
+    if request.method == "POST":
+        id = request.form.get("address_id")
+        params = {"address_id":id}
+        db.execute(text("delete from addresses where address_id = :address_id"), params)
+        db.commit()
+
+        params = {"user_id": session["account_num"]}
+        addresses = db.execute(text("select * from addresses where user_id = :user_id"), params).all()
+        return render_template("delete_addresses.html", addresses=addresses)
+    else:
+        params = {"user_id": session["account_num"]}
+        addresses = db.execute(text("select * from addresses where user_id = :user_id"), params).all()
+        return render_template("delete_addresses.html", addresses=addresses)
+
+@app.route("/my_account/edit", methods=["Get", "POST"])
+@login_required
+@customer_page
+def edit_address():
+    if request.method == "POST":
+        address_id = request.form.get("address_id")
+        reciever = request.form.get("reciever")
+        contact = request.form.get("contact_number")
+        address1 = request.form.get("address_1")
+        address2 = request.form.get("address_2")
+        city = request.form.get("city")
+        zip = request.form.get("zip")
+        state = request.form.get("state")
+        is_default = request.form.get("default_address")
+        if is_default == "on":
+            is_default == True
+        else:
+            is_default == False
+
+        params={"user_id":session["account_num"], "address_id":address_id, "reciever":reciever, "contact":contact, "address1":address1, "address2":address2, "city":city, "zip":zip, "state":state}
+
+        if is_default:
+            db.execute(text("update addresses set default_address = 'No' where user_id = :user_id"), params)
+            db.commit()
+            db.execute(text("update addresses set default_address = 'Yes', reciever = :reciever, contact_number = :contact, address_line_1 = :address1, address_line_2 = :address2, city = :city, state = :state, zip = :zip where address_id = :address_id"), params)
+            db.commit()
+        else:
+            db.execute(text("update addresses set default_address = 'No', reciever = :reciever, contact_number = :contact, address_line_1 = :address1, address_line_2 = :address2, city = :city, state = :state, zip = :zip where address_id = :address_id"), params)
+            db.commit()
+
+        addresses = db.execute(text("select * from addresses where user_id = :user_id and default_address = 'No'"), params).all()
+        return render_template("edit_address.html", addresses=addresses)
+
+    else:
+        params = {"user_id":session["account_num"]}
+        addresses = db.execute(text("select * from addresses where user_id = :user_id and default_address = 'No'"), params).all()
+        return render_template("edit_address.html", addresses=addresses)
 
 # admin routes
 @app.route("/view", methods=["GET", "POST"])
