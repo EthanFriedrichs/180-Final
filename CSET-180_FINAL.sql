@@ -81,3 +81,17 @@ select * from discounts;
 insert into discounts (discount_expire, discount_percent, item_id) values (now(), 20, 2);
 select discount_id, discount_expire, discount_percent, discounts.item_id from discounts join items on (discounts.item_id = items.item_id) where user_id = 2;
 update discounts set discount_expire = "DATE" where item_id = 2;
+
+drop table chat_room;
+create table chat_room (chat_id int primary key auto_increment, user_one_id int, user_two_id int, is_complaint varchar(5) not null);
+select * from chat_room;
+insert into chat_room (user_one_id, user_two_id, is_complaint) values (2, 1, "No"), (3, 2, "No");
+
+drop table messages;
+create table messages (message_id int primary key auto_increment, message varchar(255), sender_id int, time_sent datetime, chat_id int,
+foreign key (sender_id) references users(user_id),
+foreign key (chat_id) references chat_room(chat_id));
+select * from messages;
+insert into messages (message, sender_id, time_sent, chat_id) values ("Hello", 2, now(), 1), ("Hello but admin text", 1, now(), 1), ("Hello I am the only message", 2, now(), 2);
+
+select message_id, message, sender_id, time_sent, messages.chat_id, user_one_id, user_two_id, is_complaint from messages join chat_room on (messages.chat_id = chat_room.chat_id);

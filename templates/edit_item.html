@@ -5,7 +5,6 @@
 {% endblock %}
 
 {% block body %}
-    <h1>This is the edit items page</h1>
     {%for i in range(items|length)%}
         <div class = "container">
             <form action="/vendor/edit" method="post">
