@@ -67,7 +67,7 @@ foreign key (user_id) references users(user_id));
 select * from orders;
 update orders set order_status = "Shipped";
 
-select order_items.ordered_item_id, order_items.order_id, order_items.price, order_items.quantity, order_items.item_name, describer.size, describer.color from order_items join items on (order_items.item_id = items.item_id) join describer on (order_items.color_id = describer.color_id) where items.user_id = 2 and order_items.order_status = 'Pending';
+select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color_id from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = 3;
 
 
 drop table order_items;

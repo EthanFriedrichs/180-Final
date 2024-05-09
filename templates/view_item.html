@@ -73,6 +73,12 @@
                 {% endif %}
 
                 <br>
+                {% if product[3] > 0 %}
+                    <p class="shop-item-info">In Stock: {{product[3]}}</p>
+                {% else %}
+                    <p class="shop-item-info">Out of Stock</p>
+                {% endif %}
+
                 
                 {% if reviews|length > 0 %}
                     <span class="shop-item-price">Reviews</span>
@@ -84,7 +90,7 @@
                     {% endfor %}
                 {% endif %}
                 
-                {% if session["account_type"] == "Customer" %}
+                {% if session["account_type"] == "Customer" and product[3] > 0 %}
                     <form action="/item/{{product[0]}}" method="post">
                         <div class="mb-3">
                             <label>Color/Size:</label>
