@@ -1470,12 +1470,16 @@ def vendor_complaints():
 
         params = {"status":"Processing"}
         complaints = db.execute(text("select * from complaints where review_status = :status"), params).all()
-        return render_template("vendor_complaints.html", complaints=complaints)
+        if (len(complaints) < 1):
+            warning = "You have no complaints."
+        return render_template("vendor_complaints.html", complaints=complaints, warning=warning)
         
     else:
         params = {"status":"Processing"}
         complaints = db.execute(text("select * from complaints where review_status = :status"), params).all()
-        return render_template("vendor_complaints.html", complaints=complaints)
+        if (len(complaints) < 1):
+            warning = "You have no complaints."
+        return render_template("vendor_complaints.html", complaints=complaints, warning=warning)
 
 @app.route("/chats", methods=["GET", "POST"])
 @login_required
