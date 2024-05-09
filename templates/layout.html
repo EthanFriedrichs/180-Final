@@ -25,9 +25,6 @@
                   <button class="barItem input" style="margin-left:10px;">
                     <a href="/view">View Items</a>
                   </button>
-                  <button class="barItem input" style="margin-left:10px;">
-                    <a href="/chats">Chats</a>
-                  </button>
                   {% endif %}
                   
                   {% if session["account_type"] == "Admin" %}
@@ -98,13 +95,15 @@
                   <button class="barItem input" style="margin-left:10px;">
                       <a href="/login">LOGIN</a>
                   </button>
-      
                   <button class="barItem input" style="margin-left:10px;">
                   <a href="/register">SIGNUP</a>
                   </button>
               </div>
             {% else %}
               <div class="formSection barItem">
+                <button class="barItem input" style="margin-left:10px;">
+                  <a href="/chats">Chat</a>
+                </button> 
                 <button class="barItem input" style="margin-left:10px;">
                   <a href="/my_account">{{session["username"]}}</a>
                 </button>

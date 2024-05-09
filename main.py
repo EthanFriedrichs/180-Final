@@ -355,14 +355,14 @@ def item_page(item_id):
             colors = db.execute(text("select distinct color from describer where color != 'N/A'")).all()
             sizes = db.execute(text("select distinct size from describer where size != 'N/A'")).all()
             categories = db.execute(text("select distinct category from describer where category != 'N/A'")).all()
-            return render_template("view.html", products=products, users=users, colors=colors, sizes=sizes, categories=categories)
+            discounts = db.execute(text("select * from discounts")).all()
+
+            return render_template("view.html", products=products, users=users, colors=colors, sizes=sizes, categories=categories, discounts=discounts)
         else:
             params = {"item_id":item_id}
             product = db.execute(text("select * from items where item_id = :item_id"), params).all()
             users = db.execute(text("select * from users")).all()
             reviews = db.execute(text("select review_text, time_review, stars, email from reviews join users on (reviews.user_id = users.user_id) where reviews.item_id = :item_id"), params).all()
-
-
 
             if request.form.get("filter") != "N/A":
                 params = {"stars":request.form.get("filter"), "item_id":item_id}
@@ -1335,6 +1335,11 @@ def cart():
         address = request.form.get("address")
         params = {"id":session["account_num"]}
         current_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color_id from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = :id;"), params).all()
+        #check all items and return apology if there isnt enough in stock
+        for item in current_info:
+            if item[3] < item[6]:
+                return apology(f"{item[1]} doesn't have enough stock")
+        
         # Adds to order and then removes the cart items via their cart_id
         params = {"date_ordered":date_ordered, "id":session["account_num"], "status":"Pending", "address":address}
         db.execute(text("insert into orders (date_ordered, user_id, order_status, address_id) values (:date_ordered, :id, :status, :address)"), params)
@@ -1345,8 +1350,15 @@ def cart():
             params = {"id":order_id[0][0], "price":current_info[i][2], "quantity":current_info[i][6], "name":current_info[i][1], "item_id":current_info[i][0], "color_id":current_info[i][9], "status":"Pending"}
             db.execute(text("insert into order_items (order_id, price, quantity, item_name, item_id, color_id, order_status) values (:id, :price, :quantity, :name, :item_id, :color_id, :status)"), params)
             db.commit()
+            
             params = {"id":current_info[i][4]}
             db.execute(text("delete from cart where cart_id = :id"), params)
+            db.commit()
+
+            params = {"stock":current_info[i][3]-current_info[i][6], "item_id":current_info[i][0]}
+            if params["stock"] < 0:
+                return apology("Something went wrong")
+            db.execute(text("update items set in_stock = :stock where item_id = :item_id"), params)
             db.commit()
         return redirect("/customer/order")
     else:
