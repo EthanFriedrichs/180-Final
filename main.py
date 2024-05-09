@@ -325,7 +325,8 @@ def view():
         colors = db.execute(text("select distinct color from describer where color != 'N/A'")).all()
         sizes = db.execute(text("select distinct size from describer where size != 'N/A'")).all()
         categories = db.execute(text("select distinct category from describer where category != 'N/A'")).all()
-        return render_template("view.html", products=products, users=users, colors=colors, sizes=sizes, categories=categories)
+        discounts = db.execute(text("select * from discounts")).all()
+        return render_template("view.html", products=products, users=users, colors=colors, sizes=sizes, categories=categories, discounts=discounts)
     
 
 @app.route("/item/<item_id>", methods=["GET", "POST"])
@@ -824,7 +825,8 @@ def admin_edit():
 def vendor():
     params = {"account_num":session["account_num"]}
     products = db.execute(text("select * from items where user_id = :account_num"),params).all()
-    return render_template("vendor.html", products=products)
+    discounts = db.execute(text("select * from discounts")).all()
+    return render_template("vendor.html", products=products, discounts=discounts)
 
 @app.route("/vendor/add", methods=["GET", "POST"])
 @login_required
