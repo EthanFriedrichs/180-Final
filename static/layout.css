@@ -384,3 +384,41 @@ color:black;
 .complaint-div p{
     font-size: 20px;
 }
+
+.message-input-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.message-input-container input {
+    margin: 20px;
+    padding: 10px;
+}
+
+.message-container {
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(173, 216, 230, 0.7);
+    border-radius: 5px;
+    height: 85%;
+}
+
+.message-box {
+    margin: 10px;
+    align-content: flex-end;
+}
+
+.message-box p {
+    padding: 10px;
+    background-color: rgba(233, 242, 245, 0.7);
+    border-radius: 5px;
+    margin-bottom: 0px;
+}
+
+.message-left {
+    align-self: flex-start;
+}
+
+.message-right {
+    align-self: flex-end;
+}

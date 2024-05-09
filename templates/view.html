@@ -50,24 +50,25 @@
         </form>
     </div>
 
-    {% for product in products %}
+    {% for i in range(products|length) %}
         <div class="shop-items-0">
             <!-- add items here with jinja -->
             <div class="shop-item">
-                <span class="shop-item-title">{{product[1]}}</span>
+                <span class="shop-item-title">{{products[i][1]}}</span>
                 <!-- <img class="shop-item-image">  NEED IMAGES TABLE FIRST--> 
                 <div class="shop-item-details">
-                    <span class="shop-item-price">{{"${:,.2f}".format(product[2])}}</span>
+                    <span class="shop-item-price">{{"${:,.2f}".format(products[i][2] - (products[i][2] * (discounts[i][2]/100)))}}</span>
                 </div>
+                <h4>{{discounts[i][2]}}% Off!</h4>
                 <div class="shop-item-details2">
-                    <p class="shop-item-info">{{product[6]}}</p>
+                    <p class="shop-item-info">{{products[i][6]}}</p>
                     {% for user in users %}
-                        {% if user[0] == product[4] %}
+                        {% if user[0] == products[i][4] %}
                             <p class="shop-item-info">Sold By: {{user[1]}}</p>
                         {% endif %}
                     {% endfor %}
-                    <form action="/item/{{product[0]}}" method="get">
-                        <input type="hidden" name="item_id" value="{{product[0]}}">
+                    <form action="/item/{{products[i][0]}}" method="get">
+                        <input type="hidden" name="item_id" value="{{products[i][0]}}">
                         <button class="btn btn-primary" type="submit">View Item</button>
                     </form>
                 </div>

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    My Complaints
+    Product Complaints
 {% endblock %}
 
 {% block body %}
@@ -9,6 +9,7 @@
 
     <div style="min-height: 75vh; display:flex; align-items:center content-section">
         <div class="container py-5 text-center">
+            <h2>{{warning}}</h2>
             {%for i in range(complaints|length)%}
             <form action="/admin/complaint_view" method="post">
                 <h1>Complaint {{i + 1}}:</h1>
