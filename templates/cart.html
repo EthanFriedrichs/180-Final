@@ -42,6 +42,41 @@
         {% endfor %}
         <form action="/customer/cart" method="post" class="">
             <div class = "edit-div">
+                <p style="padding-right: 5px">Card Holder: </p>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="card_name" placeholder="John Smith" type="text" required>
+                </div>
+            </div>
+            <div class = "edit-div">
+                <p style="padding-right: 5px">Card Number: </p>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="card_num" placeholder="1234-5678-9123-4567" type="text" required>
+                </div>
+            </div>
+            <div class = "edit-div">
+                <p style="padding-right: 5px">CCR: </p>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="ccr" placeholder="123" type="text" required>
+                </div>
+            </div>
+            <div class = "edit-div">
+                <p style="padding-right: 5px">Expr. Date: </p>
+                <div class="mb-3">
+                    <input class="form-control mx-auto w-auto" name="date" placeholder="06/27" type="text" required>
+                </div>
+            </div>
+            <div class = "edit-div">
+                <p style="padding-right: 5px">Delivery Address: </p>
+                <div class="mb-3">
+                    <select name="address" style="appearance: menulist;" class="form-control mx-auto w-auto">
+                        <option selected value="{{addresses[0][0]}}">{{addresses[0][5]}}</option>
+                        {% for address in addresses %}
+                            {% if not loop.first %}<option value="{{address[0]}}">{{address[5]}}</option>{% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class = "edit-div">
                     <button id = "color" class="large-btn" type="submit">Place order</button>
             </div>
         </form>

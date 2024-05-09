@@ -17,6 +17,17 @@
             <h2>Name: {{info[3]}}</h2>
             <h2>Account Type: {{info[5]}}</h2>
             <br>
+            {% if address|length > 0 %}
+                <h1>Default Address:</h1>
+                <h2>Reciever: {{address[0][3]}}</h2>
+                <h2>Contact Number: {{address[0][4]}}</h2>
+                <h2>Address Line 1: {{address[0][5]}}</h2>
+                <h2>Address Line 2: {{address[0][5]}}</h2>
+                <h2>City: {{address[0][6]}}</h2>
+                <h2>State: {{address[0][7]}}</h2>
+                <h2>Zip: {{address[0][8]}}</h2>
+            {% endif %}
+
             {% if session["account_type"] == "Customer" %}
                 <button class="btn btn-primary">
                     <a href="/my_account/add" style="color: black;">Add Address</a>
@@ -35,4 +46,5 @@
     </div>
     
 </section>
+<br>
 {% endblock %}

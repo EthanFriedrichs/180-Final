@@ -61,10 +61,13 @@ foreign key (item_id) references items(item_id));
 select * from reviews;
 
 drop table orders;
-create table orders (order_id int primary key auto_increment, date_ordered datetime not null, user_id int, order_status varchar(26) not null,
+create table orders (order_id int primary key auto_increment, date_ordered datetime not null, user_id int, order_status varchar(26) not null, address_id int,
+foreign key (address_id) references addresses(address_id),
 foreign key (user_id) references users(user_id));
 select * from orders;
 update orders set order_status = "Shipped";
+
+select order_items.ordered_item_id, order_items.order_id, order_items.price, order_items.quantity, order_items.item_name, describer.size, describer.color from order_items join items on (order_items.item_id = items.item_id) join describer on (order_items.color_id = describer.color_id) where items.user_id = 2 and order_items.order_status = 'Pending';
 
 
 drop table order_items;

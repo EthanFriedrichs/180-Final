@@ -75,7 +75,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection string is in the format mysql://user:password@server/database
-conn_str = "mysql://root:ethanpoe125@localhost/customers_2"
+conn_str = "mysql://root:Just5fun!@localhost/customers_2"
 engine = create_engine(conn_str) # echo=True tells you if connection is successful or not
 db = engine.connect()
 
@@ -180,7 +180,7 @@ def login():
 @app.route("/logout", methods=["GET"])
 def logout():
     session.clear()
-    return render_template("index.html")
+    return redirect("/login")
 
 #account routes
 @app.route("/my_account", methods=["Get", "POST"])
@@ -189,7 +189,8 @@ def my_account():
     user_id = session["account_num"]
     params = {"user_id":user_id}
     info = db.execute(text("select * from users where user_id = :user_id"), params).all()
-    return render_template("account.html", info=info[0])
+    address = db.execute(text("select * from addresses where user_id = :user_id and default_address = 'Yes'"), params).all()
+    return render_template("account.html", info=info[0], address=address)
 
 @app.route("/my_account/add", methods=["Get", "POST"])
 @login_required
@@ -1257,6 +1258,7 @@ def confirm_orders():
     else:
         params = {"user_id":session["account_num"]}
         orders = db.execute(text("select order_items.ordered_item_id, order_items.order_id, order_items.price, order_items.quantity, order_items.item_name, describer.size, describer.color from order_items join items on (order_items.item_id = items.item_id) join describer on (order_items.color_id = describer.color_id) where items.user_id = :user_id and order_items.order_status = 'Pending'"), params).all()
+        print(orders)
         return render_template("vendor_order.html", orders=orders)
     
 @app.route("/vendor/delivery", methods=["GET", "POST"])
@@ -1326,11 +1328,12 @@ def ship_orders():
 def cart():
     if request.method == "POST":
         date_ordered = datetime.now()
+        address = request.form.get("address")
         params = {"id":session["account_num"]}
         current_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color_id from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = :id;"), params).all()
         # Adds to order and then removes the cart items via their cart_id
-        params = {"date_ordered":date_ordered, "id":session["account_num"], "status":"Pending"}
-        db.execute(text("insert into orders (date_ordered, user_id, order_status) values (:date_ordered, :id, :status)"), params)
+        params = {"date_ordered":date_ordered, "id":session["account_num"], "status":"Pending", "address":address}
+        db.execute(text("insert into orders (date_ordered, user_id, order_status, address_id) values (:date_ordered, :id, :status, :address)"), params)
         db.commit()
         for i in range(len(current_info)):
             params = {"id":session["account_num"]}
@@ -1347,27 +1350,26 @@ def cart():
         cart_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color, describer.size from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = :id;"), params).all()
         if (len(cart_info) < 1):
             cart_info = "None"
-        print(cart_info)
-        return render_template("cart.html", cart_info=cart_info)
+        addresses = db.execute(text("select * from addresses where user_id = :id order by default_address desc"), params).all()
+        return render_template("cart.html", cart_info=cart_info, addresses=addresses)
     
 @app.route("/customer/order")
 @login_required
 @customer_page
 def orders():
     params = {"id":session["account_num"]}
-    orders = db.execute(text("select * from orders where user_id = :id order by date_ordered desc"), params).all()
+    orders = db.execute(text("select * from orders join addresses on (orders.address_id = addresses.address_id) where orders.user_id = :id order by orders.date_ordered desc"), params).all()
     if (len(orders) > 0):
-        params = {"id":session["account_num"]}
-        order_info = db.execute(text("select * from orders join order_items on (orders.order_id = order_items.order_id) join describer on (order_items.color_id = describer.color_id) where user_id = :id"), params).all()
+        order_infos = db.execute(text("select * from orders join order_items on (orders.order_id = order_items.order_id) join describer on (order_items.color_id = describer.color_id) where user_id = :id"), params).all()
         totals = []
-        for i in range(len(orders)):
-            added = 0
-            for v in order_info:
-                if v[0] == i + 1:
-                    added += v[6] * v[7]
-            totals.append(added)
-                    
-        return render_template("order.html", orders=orders, order_info=order_info, totals=totals)
+        for order in orders:
+            total = 0
+            for order_info in order_infos:
+                if order_info[6] == order[0]:
+                    total += order_info[7] * order_info[8]
+            totals.append(total)
+        totals.reverse()         
+        return render_template("order.html", orders=orders, order_info=order_infos, totals=totals)
     
     else:
         return render_template("order.html", orders="None", order_info="None", totals="None")
@@ -1383,7 +1385,9 @@ def update_cart():
     cart_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color, describer.size from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = :id;"), params).all()
     if (len(cart_info) < 1):
         cart_info = "None"
-    return render_template("cart.html", cart_info=cart_info)
+
+    addresses = db.execute(text("select * from addresses where user_id = :id order by default_address desc"), params).all()
+    return render_template("cart.html", cart_info=cart_info, addresses=addresses)
 
 @app.route("/cart/delete", methods=["GET", "POST"])
 @login_required
@@ -1396,7 +1400,8 @@ def delete_cart():
     cart_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color, describer.size from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = :id;"), params).all()
     if (len(cart_info) < 1):
         cart_info = "None"
-    return render_template("cart.html", cart_info=cart_info)
+    addresses = db.execute(text("select * from addresses where user_id = :id order by default_address desc"), params).all()
+    return render_template("cart.html", cart_info=cart_info, addresses=addresses)
 
 @app.route("/customer/complaint_make", methods=["GET", "POST"])
 @login_required
