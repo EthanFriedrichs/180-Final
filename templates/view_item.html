@@ -40,12 +40,16 @@
     </div>
 
     <div class="shop-items-0">
-        <!-- add items here with jinja -->
         <div class="shop-item">
             <span class="shop-item-title">{{product[1]}}</span>
-            <!-- <img class="shop-item-image">  NEED IMAGES TABLE FIRST--> 
+            <!-- <img class="shop-item-image">  NEED IMAGES TABLE FIRST-->
+            <h5>Was {{"${:,.2f}".format(product[2])}}</h5> 
             <div class="shop-item-details">
-                <span class="shop-item-price">{{"${:,.2f}".format(product[2])}}</span>
+                {% for discount in discounts %}
+                    {% if discount[3] == product[0] %}
+                    <span class="shop-item-price">{{"${:,.2f}".format(product[2] - (product[2] * (discount[2]/100)))}}</span>
+                    {% endif %}
+                {% endfor %}
             </div>
             <div class="shop-item-details2">
                 <p class="shop-item-info">{{product[6]}}</p>
