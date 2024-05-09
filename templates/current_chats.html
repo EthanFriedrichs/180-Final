@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    My Current Chats
+{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="../static/view.css">
+    <div style="min-height: 75vh; display:flex; align-items:center content-section">
+        <div class="container py-5 text-center message-input-container">
+            {%for i in chat_users%}
+                <form action="/chat/{{i[0]}}" method="get">
+                    <h3>Between you and {{i[2]}} <button class="final-btn" type="submit">View</button></h3>
+                </form>
+            {%endfor%}
+        </div>
+    </div>
+{% endblock %}

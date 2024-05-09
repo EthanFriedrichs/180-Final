@@ -1166,6 +1166,7 @@ def confirm_orders():
     
 @app.route("/vendor/delivery", methods=["GET", "POST"])
 @login_required
+@vendor_page
 def delivery_orders():
     if request.method == "POST":
         params = {"order_id":request.form.get("order_id"), "ordered_item_id":request.form.get("order_item_id")}
@@ -1196,6 +1197,7 @@ def delivery_orders():
     
 @app.route("/vendor/ship", methods=["GET", "POST"])
 @login_required
+@vendor_page
 def ship_orders():
     if request.method == "POST":
         params = {"order_id":request.form.get("order_id"), "ordered_item_id":request.form.get("order_item_id")}
@@ -1377,6 +1379,75 @@ def vendor_complaints():
         params = {"status":"Processing"}
         complaints = db.execute(text("select * from complaints where review_status = :status"), params).all()
         return render_template("vendor_complaints.html", complaints=complaints)
+
+@app.route("/chats", methods=["GET", "POST"])
+@login_required
+def search_chats():
+    if request.method == "POST":
+        return render_template("chats.html")
+    
+    else:
+        params = {"id":session["account_num"]}
+        current_rooms = db.execute(text("select * from chat_room where user_one_id = :id or user_two_id = :id"), params).all()
+        
+        chat_users = []
+        for i in current_rooms:
+            if (i[1] == session["account_num"]):
+                params = {"id1":i[1], "id2":i[2]}
+                chat_users.append([i[0], db.execute(text("select username from users where user_id = :id1"), params).all()[0][0], db.execute(text("select username from users where user_id = :id2"), params).all()[0][0]])
+
+            else:
+                params = {"id1":i[2], "id2":i[1]}
+                chat_users.append([i[0], db.execute(text("select username from users where user_id = :id1"), params).all()[0][0], db.execute(text("select username from users where user_id = :id2"), params).all()[0][0]])
+
+        return render_template("current_chats.html", chat_users=chat_users)
+
+@app.route("/chat/<chat_id>", methods=["GET", "POST"])
+@login_required
+def clientside_chat(chat_id):
+    if request.method == "POST":
+        send_message = request.form.get("message_input")
+        params = {"message":send_message, "id":session["account_num"], "time":datetime.now(), "chat_id":chat_id}
+        db.execute(text("insert into messages (message, sender_id, time_sent, chat_id) values (:message, :id, :time, :chat_id)"), params)
+        db.commit()
+        params = {"chat_id":chat_id}
+        current_room = db.execute(text("select * from chat_room where chat_id = :chat_id"), params).all()[0]
+        messages = db.execute(text("select * from messages where chat_id = :chat_id"), params).all()
+        if (current_room[1] != session["account_num"]):
+            params = {"id":current_room[1]}
+        else:
+            params = {"id":current_room[2]}
+        other_user = db.execute(text("select username from users where user_id = :id"), params).all()[0][0]
+        formatted_messages = []
+        for i in messages:
+            if i[2] == session["account_num"]:
+                formatted_messages.append(["Sent", i[1]])
+            else:
+                formatted_messages.append(["Recieved", i[1]])
+        if (current_room[1] == session["account_num"]) or (current_room[2] == session["account_num"]):
+            return render_template("chat.html", formatted_messages=formatted_messages, other_user=other_user, chat_id=chat_id)
+        else:
+            return render_template("chat.html")
+    
+    else:
+        params = {"chat_id":chat_id}
+        current_room = db.execute(text("select * from chat_room where chat_id = :chat_id"), params).all()[0]
+        messages = db.execute(text("select * from messages where chat_id = :chat_id"), params).all()
+        if (current_room[1] != session["account_num"]):
+            params = {"id":current_room[1]}
+        else:
+            params = {"id":current_room[2]}
+        other_user = db.execute(text("select username from users where user_id = :id"), params).all()[0][0]
+        formatted_messages = []
+        for i in messages:
+            if i[2] == session["account_num"]:
+                formatted_messages.append(["Sent", i[1]])
+            else:
+                formatted_messages.append(["Recieved", i[1]])
+        if (current_room[1] == session["account_num"]) or (current_room[2] == session["account_num"]):
+            return render_template("chat.html", formatted_messages=formatted_messages, other_user=other_user, chat_id=chat_id)
+        else:
+            return apology("You do not have access to this page.")
 
 def apology(message, code=400):
     def escape(s):
