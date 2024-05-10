@@ -75,7 +75,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection string is in the format mysql://user:password@server/database
-conn_str = "mysql://root:Just5fun!@localhost/customers_2"
+conn_str = "mysql://root:ethanpoe125@localhost/customers_2"
 engine = create_engine(conn_str) # echo=True tells you if connection is successful or not
 db = engine.connect()
 
@@ -1607,6 +1607,16 @@ def remove_image(image_id):
     db.commit()
     return redirect("/vendor/edit")
 
+@app.route("/vendor_new_image/<item_id>")
+@login_required
+@vendor_page
+def make_new_image(item_id):
+    params = {"url":"None", "id":item_id}
+    db.execute(text("insert into images (image_url, item_id) values (:url, :id)"), params)
+    db.commit()
+    image_id = db.execute(text("select * from images order by image_id desc")).all()[0][0]
+    redirect_link = "/vendor_image/" + str(image_id)
+    return redirect(redirect_link)
 
 def apology(message, code=400):
     def escape(s):
