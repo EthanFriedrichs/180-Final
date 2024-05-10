@@ -8,7 +8,7 @@ select * from users;
 update users set user_type = "Admin" where user_id = 1;
 
 drop table addresses;
-create table addresses (address_id int primary key auto_increment, user_id int, default_address varchar(3), reciever varchar(30), contact_number varchar(15), address_line_1 varchar(255), address_line_2 varchar(255), city varchar(20), state varchar(2), zip varchar(5));
+create table addresses (address_id int primary key auto_increment, user_id int, default_address varchar(3), reciever varchar(30), contact_number varchar(15), address_line_1 varchar(255), address_line_2 varchar(255), city varchar(20), state varchar(2), zip varchar(5), is_active varchar(3));
 select * from addresses;
 
 
