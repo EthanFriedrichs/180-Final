@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Edit items
+{% endblock %}
+
+{% block body %}
+    {%for i in images%}
+    <link rel="stylesheet" href="../static/view.css">
+
+    <div style="min-height: 75vh; display:flex; align-items:center content-section">
+        <div class="container py-5 text-center message-input-container">
+            <form action="/vendor_image/{{i[0]}}" method="post">
+                <div class = "edit-div spaced-div">
+                    <textarea class="form-control w-auto" style="height: 300px; margin: 10px;" name="new_img_link" placeholder="New link" type="text"></textarea>
+                    <img src="{{i[1]}}" alt="This is your current image" style="width: 50%; height: 50%;">
+                </div>
+                <div class = "edit-div">
+                    <button id = "color1" class="color-btn final-btn" type="submit">Save Changes</button>
+                </div>
+            </form>
+            <form action="/vendor_del_image/{{i[0]}}">
+                <div class = "edit-div">
+                    <button id = "color2" class="color-btn remove-btn" type="submit">Remove this image</button>
+                </div>
+            </form>
+            <form action="/vendor/edit" method="get">
+                <div class = "edit-div">
+                    <button id = "color3" class="color-btn final-btn" type="submit">Go back</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {%endfor%}
+
+{% endblock %}

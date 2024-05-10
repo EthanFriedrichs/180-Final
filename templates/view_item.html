@@ -42,7 +42,13 @@
     <div class="shop-items-0">
         <div class="shop-item">
             <span class="shop-item-title">{{product[1]}}</span>
-            <!-- <img class="shop-item-image">  NEED IMAGES TABLE FIRST-->
+            {% for i in images%}
+                <input type="hidden" value="{{i[1]}}" name="hidden_images">
+            {% endfor %}
+            <div class="image-div">
+                <img src="{{images[0][1]}}" alt="Item Image">
+            </div>
+            <h5>Click to cycle images</h5> 
             <h5>Was {{"${:,.2f}".format(product[2])}}</h5> 
             <div class="shop-item-details">
                 {% for discount in discounts %}
@@ -108,4 +114,26 @@
         </div>
     </div>
 </section>
+
+<script type = "text/javascript">
+    var element = document.getElementsByTagName("img")[1]
+    var hidden = document.getElementsByName("hidden_images")
+    document.addEventListener("click", function() {
+        var changed = 0
+        for (let i = 0; i < hidden.length; i++) {
+            if (i + 1 < hidden.length) {
+                if (changed != 1) {
+                    if (element.getAttribute("src") == hidden[i].getAttribute("value")) {
+                    element.setAttribute("src", hidden[i + 1].getAttribute("value"))
+                    changed = 1
+                    }
+                }
+            }
+        }
+        if (changed == 0) {
+            element.setAttribute("src", hidden[0].getAttribute("value"))
+            changed = 1
+        }
+});
+</script>
 {% endblock %}
