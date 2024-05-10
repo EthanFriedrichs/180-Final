@@ -30,10 +30,16 @@
 
             {% if session["account_type"] == "Customer" %}
                 <button class="btn btn-primary">
+                    <a href="/my_account/view" style="color: black;">View Addresses</a>
+                </button>
+                <button class="btn btn-primary">
                     <a href="/my_account/add" style="color: black;">Add Address</a>
                 </button>
                 <button class="btn btn-primary">
                     <a href="/my_account/edit" style="color: black;">Edit Addresses</a>
+                </button>
+                <button class="btn btn-primary">
+                    <a href="/my_account/edit_default" style="color: black;">Edit Default Address</a>
                 </button>
                 <button class="btn btn-primary">
                     <a href="/my_account/delete" style="color: black;">Delete Address</a>

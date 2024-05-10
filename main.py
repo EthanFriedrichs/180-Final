@@ -29,7 +29,7 @@ def admin_page(
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get("isAdmin") == False:
+        if session["account_type"] != "Admin":
             return apology("This is admin page, u no have access", 400)
         return f(*args, **kwargs)
 
@@ -44,7 +44,7 @@ def vendor_page(
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get("isAdmin") == True:
+        if session["account_type"] != "Vendor":
             return apology("This is user page, u no have access", 400)
         return f(*args, **kwargs)
 
@@ -59,7 +59,7 @@ def customer_page(
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get("isAdmin") == True:
+        if session["account_type"] != "Customer":
             return apology("This is user page, u no have access", 400)
         return f(*args, **kwargs)
 
@@ -192,6 +192,14 @@ def my_account():
     address = db.execute(text("select * from addresses where user_id = :user_id and default_address = 'Yes'"), params).all()
     return render_template("account.html", info=info[0], address=address)
 
+@app.route("/my_account/view", methods=["Get", "POST"])
+@login_required
+@customer_page
+def view_addresses():
+    params = {"user_id": session["account_num"]}
+    addresses = db.execute(text("select * from addresses where user_id = :user_id and is_active = 'Yes' order by default_address desc"), params).all()
+    return render_template("view_addresses.html", addresses=addresses)
+
 @app.route("/my_account/add", methods=["Get", "POST"])
 @login_required
 @customer_page
@@ -219,10 +227,10 @@ def add_address():
         if is_default or len(db.execute(text("select * from addresses where user_id = :user_id and default_address = 'Yes'"), params).all()) == 0:
             db.execute(text("update addresses set default_address = 'No' where user_id = :user_id"), params)
             db.commit()
-            db.execute(text("insert into addresses (user_id, default_address, reciever, contact_number, address_line_1, address_line_2, city, state, zip) values (:user_id, 'Yes', :reciever, :contact, :address1, :address2, :city, :state, :zip)"), params)
+            db.execute(text("insert into addresses (user_id, default_address, reciever, contact_number, address_line_1, address_line_2, city, state, zip, is_active) values (:user_id, 'Yes', :reciever, :contact, :address1, :address2, :city, :state, :zip, 'Yes')"), params)
             db.commit()
         else:
-            db.execute(text("insert into addresses (user_id, default_address, reciever, contact_number, address_line_1, address_line_2, city, state, zip) values (:user_id, 'No', :reciever, :contact, :address1, :address2, :city, :state, :zip)"), params)
+            db.execute(text("insert into addresses (user_id, default_address, reciever, contact_number, address_line_1, address_line_2, city, state, zip, is_active) values (:user_id, 'No', :reciever, :contact, :address1, :address2, :city, :state, :zip, 'Yes')"), params)
             db.commit()
 
     
@@ -237,15 +245,15 @@ def delete_address():
     if request.method == "POST":
         id = request.form.get("address_id")
         params = {"address_id":id}
-        db.execute(text("delete from addresses where address_id = :address_id"), params)
+        db.execute(text("update addresses set is_active = 'No' where address_id = :address_id"), params)
         db.commit()
 
         params = {"user_id": session["account_num"]}
-        addresses = db.execute(text("select * from addresses where user_id = :user_id"), params).all()
+        addresses = db.execute(text("select * from addresses where user_id = :user_id and is_active = 'Yes'"), params).all()
         return render_template("delete_addresses.html", addresses=addresses)
     else:
         params = {"user_id": session["account_num"]}
-        addresses = db.execute(text("select * from addresses where user_id = :user_id"), params).all()
+        addresses = db.execute(text("select * from addresses where user_id = :user_id and is_active = 'Yes'"), params).all()
         return render_template("delete_addresses.html", addresses=addresses)
 
 @app.route("/my_account/edit", methods=["Get", "POST"])
@@ -278,13 +286,41 @@ def edit_address():
             db.execute(text("update addresses set default_address = 'No', reciever = :reciever, contact_number = :contact, address_line_1 = :address1, address_line_2 = :address2, city = :city, state = :state, zip = :zip where address_id = :address_id"), params)
             db.commit()
 
-        addresses = db.execute(text("select * from addresses where user_id = :user_id and default_address = 'No'"), params).all()
+        addresses = db.execute(text("select * from addresses where user_id = :user_id and default_address = 'No' and is_active = 'Yes'"), params).all()
         return render_template("edit_address.html", addresses=addresses)
 
     else:
         params = {"user_id":session["account_num"]}
-        addresses = db.execute(text("select * from addresses where user_id = :user_id and default_address = 'No'"), params).all()
+        addresses = db.execute(text("select * from addresses where user_id = :user_id and default_address = 'No' and is_active = 'Yes'"), params).all()
         return render_template("edit_address.html", addresses=addresses)
+
+@app.route("/my_account/edit_default", methods=["Get", "POST"])
+@login_required
+@customer_page
+def edit_default_address():
+    if request.method == "POST":
+        address_id = request.form.get("address_id")
+        reciever = request.form.get("reciever")
+        contact = request.form.get("contact_number")
+        address1 = request.form.get("address_1")
+        address2 = request.form.get("address_2")
+        city = request.form.get("city")
+        zip = request.form.get("zip")
+        state = request.form.get("state")
+
+
+        params={"user_id":session["account_num"], "address_id":address_id, "reciever":reciever, "contact":contact, "address1":address1, "address2":address2, "city":city, "zip":zip, "state":state}
+            
+        db.execute(text("update addresses set default_address = 'Yes', reciever = :reciever, contact_number = :contact, address_line_1 = :address1, address_line_2 = :address2, city = :city, state = :state, zip = :zip where address_id = :address_id"), params)
+        db.commit()
+
+        addresses = db.execute(text("select * from addresses where user_id = :user_id and default_address = 'Yes' and is_active = 'Yes'"), params).all()
+        return render_template("edit_address_default.html", addresses=addresses)
+
+    else:
+        params = {"user_id":session["account_num"]}
+        addresses = db.execute(text("select * from addresses where user_id = :user_id and default_address = 'Yes' and is_active = 'Yes'"), params).all()
+        return render_template("edit_address_default.html", addresses=addresses)
 
 # admin routes
 @app.route("/view", methods=["GET", "POST"])
@@ -339,15 +375,16 @@ def item_page(item_id):
 
             user_id = session["account_num"]
             variation = request.form.get("color_size")
-            params = {"user_id":user_id, "item_id":item_id, "color_id":variation}
+            quanitity = request.form.get("quant")
+            params = {"user_id":user_id, "item_id":item_id, "color_id":variation, "quantity":quanitity}
             in_cart = db.execute(text("select * from cart where user_id = :user_id and item_id = :item_id and color_id = :color_id"), params).all()
             if len(in_cart) > 0:
-                quanitity = in_cart[0][3] + 1
+                quanitity = in_cart[0][3] + quanitity
                 params = {"user_id":user_id, "item_id":item_id, "quant":quanitity, "color_id":variation}
                 db.execute(text("update cart set quantity = :quant where user_id = :user_id and item_id = :item_id and color_id = :color_id"), params)
                 db.commit()
             else:
-                db.execute(text("insert into cart (user_id, item_id, quantity, color_id) values (:user_id, :item_id, 1, :color_id)"), params)
+                db.execute(text("insert into cart (user_id, item_id, quantity, color_id) values (:user_id, :item_id, :quantity, :color_id)"), params)
                 db.commit()
 
             products = db.execute(text("select * from items order by user_id")).all()
@@ -577,18 +614,15 @@ def admin_edit():
                 
                 if new_size[i] != "":
                     if new_color[i] != "":
-                        # print("Changing size and color:", new_size[i], "/", new_color[i], "| for color id:", request.form.getlist("hidden_id")[i])
                         params = {"size":new_size[i], "color":new_color[i], "id":request.form.getlist("hidden_id")[i]}
                         db.execute(text("update describer set size = :size, color = :color where color_id = :id"), params)
                         db.commit()
                     else:
-                        # print("Changing only size:", new_size[i], "/ N/A | for color id:", request.form.getlist("hidden_id")[i])
                         params = {"size":new_size[i], "id":request.form.getlist("hidden_id")[i]}
                         db.execute(text("update describer set size = :size where color_id = :id"), params)
                         db.commit()
                 
                 elif new_color[i] != "" and new_size[i] == "":
-                    # print("Changing only color: N/A /", new_color[i], "| for color id:", request.form.getlist("hidden_id")[i])
                     params = {"color":new_color[i], "id":request.form.getlist("hidden_id")[i]}
                     db.execute(text("update describer set color = :color where color_id = :id"), params)
                     db.commit()
@@ -597,24 +631,20 @@ def admin_edit():
                 
                 if new_size[i] != "":
                     if new_color[i] != "":
-                        # print("Changing new element size and color:", new_size[i], "/", new_color[i], "| ADD TO DATABASE")
                         params = {"size":new_size[i], "color":new_color[i], "item_id":hidden_item_id}
                         db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :item_id)"), params)
                         db.commit()
                     else:
-                        # print("Changing new element size:", new_size[i], "/ N/A | ADD TO DATABASE")
                         params = {"size":new_size[i], "color":"N/A", "item_id":hidden_item_id}
                         db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :item_id)"), params)
                         db.commit()
                 
                 elif new_color[i] != "" and new_size[i] == "":
-                    # print("Changing new element color: N/A /", new_color[i], "| ADD TO DATABASE")
                     params = {"size":"N/A", "color":new_color[i], "item_id":hidden_item_id}
                     db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :item_id)"), params)
                     db.commit()
 
             elif hidden_id[i] != "none" and removals[i] == "yes":
-                # print("Removing color id:", request.form.getlist("hidden_id")[i])
                 params = {"id":request.form.getlist("hidden_id")[i]}
                 db.execute(text("delete from describer where color_id = :id;"), params)
                 db.commit()
@@ -985,18 +1015,15 @@ def edit_vendor_item():
                 
                 if new_size[i] != "":
                     if new_color[i] != "":
-                        # print("Changing size and color:", new_size[i], "/", new_color[i], "| for color id:", request.form.getlist("hidden_id")[i])
                         params = {"size":new_size[i], "color":new_color[i], "id":request.form.getlist("hidden_id")[i]}
                         db.execute(text("update describer set size = :size, color = :color where color_id = :id"), params)
                         db.commit()
                     else:
-                        # print("Changing only size:", new_size[i], "/ N/A | for color id:", request.form.getlist("hidden_id")[i])
                         params = {"size":new_size[i], "id":request.form.getlist("hidden_id")[i]}
                         db.execute(text("update describer set size = :size where color_id = :id"), params)
                         db.commit()
                 
                 elif new_color[i] != "" and new_size[i] == "":
-                    # print("Changing only color: N/A /", new_color[i], "| for color id:", request.form.getlist("hidden_id")[i])
                     params = {"color":new_color[i], "id":request.form.getlist("hidden_id")[i]}
                     db.execute(text("update describer set color = :color where color_id = :id"), params)
                     db.commit()
@@ -1005,24 +1032,20 @@ def edit_vendor_item():
                 
                 if new_size[i] != "":
                     if new_color[i] != "":
-                        # print("Changing new element size and color:", new_size[i], "/", new_color[i], "| ADD TO DATABASE")
                         params = {"size":new_size[i], "color":new_color[i], "item_id":hidden_item_id}
                         db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :item_id)"), params)
                         db.commit()
                     else:
-                        # print("Changing new element size:", new_size[i], "/ N/A | ADD TO DATABASE")
                         params = {"size":new_size[i], "color":"N/A", "item_id":hidden_item_id}
                         db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :item_id)"), params)
                         db.commit()
                 
                 elif new_color[i] != "" and new_size[i] == "":
-                    # print("Changing new element color: N/A /", new_color[i], "| ADD TO DATABASE")
                     params = {"size":"N/A", "color":new_color[i], "item_id":hidden_item_id}
                     db.execute(text("insert into describer (size, color, item_id) values (:size, :color, :item_id)"), params)
                     db.commit()
 
             elif hidden_id[i] != "none" and removals[i] == "yes":
-                # print("Removing color id:", request.form.getlist("hidden_id")[i])
                 params = {"id":request.form.getlist("hidden_id")[i]}
                 db.execute(text("delete from describer where color_id = :id;"), params)
                 db.commit()
@@ -1230,6 +1253,28 @@ def edit_vendor_item():
 
         return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year)
 
+@app.route("/vendor/orders", methods=["GET", "POST"])
+@login_required
+@vendor_page
+def view_orders():
+    params = {"id":session["account_num"]}
+    orders = db.execute(text("select * from orders join addresses on (orders.address_id = addresses.address_id) join order_items on (order_items.order_id = orders.order_id) join items on (order_items.item_id = items.item_id) where items.user_id = :id order by orders.date_ordered desc"), params).all()
+    print(orders)
+    if (len(orders) > 0):
+        order_infos = db.execute(text("select * from orders join order_items on (orders.order_id = order_items.order_id) join describer on (order_items.color_id = describer.color_id) join items on (order_items.item_id = items.item_id) where items.user_id = :id"), params).all()
+        totals = []
+        for order in orders:
+            total = 0
+            for order_info in order_infos:
+                if order_info[6] == order[0]:
+                    total += order_info[7] * order_info[8]
+            totals.append(total)
+        totals.reverse()         
+        return render_template("order.html", orders=orders, order_info=order_infos, totals=totals)
+    
+    else:
+        return render_template("order.html", orders="None", order_info="None", totals="None")
+
 
 @app.route("/vendor/order", methods=["GET", "POST"])
 @login_required
@@ -1260,7 +1305,6 @@ def confirm_orders():
     else:
         params = {"user_id":session["account_num"]}
         orders = db.execute(text("select order_items.ordered_item_id, order_items.order_id, order_items.price, order_items.quantity, order_items.item_name, describer.size, describer.color from order_items join items on (order_items.item_id = items.item_id) join describer on (order_items.color_id = describer.color_id) where items.user_id = :user_id and order_items.order_status = 'Pending'"), params).all()
-        print(orders)
         return render_template("vendor_order.html", orders=orders)
     
 @app.route("/vendor/delivery", methods=["GET", "POST"])
@@ -1333,6 +1377,8 @@ def cart():
     if request.method == "POST":
         date_ordered = datetime.now()
         address = request.form.get("address")
+        if not address:
+            return redirect ("/my_account/add")
         params = {"id":session["account_num"]}
         current_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color_id from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = :id;"), params).all()
         #check all items and return apology if there isnt enough in stock
@@ -1366,7 +1412,9 @@ def cart():
         cart_info = db.execute(text("select items.item_id, item_name, price, in_stock, cart_id, cart.user_id, quantity, users.username, users_2.username, describer.color, describer.size from items join cart on (items.item_id = cart.item_id) join users on (items.user_id = users.user_id) join users as users_2 on (cart.user_id = users_2.user_id) join describer on (cart.color_id = describer.color_id) where cart.user_id = :id;"), params).all()
         if (len(cart_info) < 1):
             cart_info = "None"
-        addresses = db.execute(text("select * from addresses where user_id = :id order by default_address desc"), params).all()
+        addresses = db.execute(text("select * from addresses where user_id = :id and is_active = 'Yes' order by default_address desc"), params).all()
+        if len(addresses) == 0:
+            addresses = [0]
         return render_template("cart.html", cart_info=cart_info, addresses=addresses)
     
 @app.route("/customer/order")
@@ -1392,6 +1440,7 @@ def orders():
     
 @app.route("/cart", methods=["GET", "POST"])
 @login_required
+@customer_page
 def update_cart():
     params = {"user_id":session["account_num"], "item_id":request.form.get("item_id"), "quantity":request.form.get("quant")}
     db.execute(text("update cart set quantity = :quantity where user_id = :user_id and item_id = :item_id"), params)
@@ -1453,7 +1502,6 @@ def customer_complain():
 def customer_view_complaints():
     params = {"id":session["account_num"]}
     complaints = db.execute(text("select * from complaints where user_id = :id"), params).all()
-    print(complaints)
     return render_template("my_complaints.html", complaints=complaints)
 
 @app.route("/admin/complaint_view", methods=["GET", "POST"])
