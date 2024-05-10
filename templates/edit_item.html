@@ -81,6 +81,14 @@
                         <input class="base-input" style="width: 200px;" name="new_percent" placeholder="New percentage" type="number" min="0" step="1" max="100">
                     </div>
                 </div>
+                {% for v in images %}
+                    {% if v[2] == items[i][0] %}
+                    <div class = "spaced-div">
+                        <img src="{{v[1]}}" alt="Image" style="width: 10%; height: 20%;">
+                        <a href="/vendor_image/{{v[0]}}" style="margin: 10px;"> Edit this image</a>
+                    </div>
+                    {%endif%}
+                {%endfor%}
                 {%for v in describers%}
                     {%if v[4] == items[i][0]%}
                         <div class = "edit-div describers-div">
@@ -153,7 +161,6 @@
                             }
                         }
                     })
-
                     documentItem.append(addedRow);
                 }
             }

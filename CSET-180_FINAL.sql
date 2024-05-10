@@ -34,8 +34,16 @@ delete from describer where color_id between 7 and 12;
 select color_id, size, color, category, describer.item_id from describer join items on (describer.item_id = items.item_id) where user_id = 2;
 
 drop table images;
-create table images (image_url varchar(255) primary key);
+create table images (image_id int primary key auto_increment, image_url varchar(255), item_id int,
+foreign key (item_id) references items(item_id));
 select * from images;
+insert into images (image_url, item_id) values 
+("https://www.thoughtco.com/thmb/6lHWjbEdFPmSU1loT4lNAWQ_n9Y=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/Copper_sulfate-58a3b2ec3df78c47587b6212.jpg", 1),
+("https://pestell.com/wp-content/uploads/2015/05/fertilizer-nutrients-copper-sulphate-10XL-granular.jpg", 1),
+("https://m.media-amazon.com/images/I/41fz64v8U6L.jpg", 1),
+("https://camachem.com/pub/media/wysiwyg/Copper_Sulfate_Pentahydrate_01.png", 1);
+
+select image_id, image_url, items.item_id, users.user_id from images join items on (images.item_id = items.item_id) join users on (items.user_id = users.user_id) where users.user_id = 2;
 
 drop table cart;
 create table cart (cart_id int primary key auto_increment, user_id int, item_id int, quantity int, color_id int,

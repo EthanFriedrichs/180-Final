@@ -383,7 +383,9 @@ def item_page(item_id):
             
             variations = db.execute(text("select * from describer where item_id = :item_id"), params).all()
             discounts = db.execute(text("select * from discounts")).all()
-            return render_template("view_item.html", product=product[0], users=users, reviews=reviews, discounts=discounts, variations=variations)
+            params = {"id":item_id}
+            images = db.execute(text("select * from images where item_id = :id"), params).all()
+            return render_template("view_item.html", product=product[0], users=users, reviews=reviews, discounts=discounts, variations=variations, images=images)
         
     else:
         params = {"item_id":item_id}
@@ -392,7 +394,9 @@ def item_page(item_id):
         variations = db.execute(text("select * from describer where item_id = :item_id"), params).all()
         discounts = db.execute(text("select * from discounts")).all()
         users = db.execute(text("select * from users")).all()
-        return render_template("view_item.html", product=product[0], users=users, reviews=reviews, discounts=discounts, variations=variations)
+        params = {"id":item_id}
+        images = db.execute(text("select * from images where item_id = :id"), params).all()
+        return render_template("view_item.html", product=product[0], users=users, reviews=reviews, discounts=discounts, variations=variations, images=images)
     
 
 @app.route("/reviews", methods=["GET", "POST"])
@@ -1153,7 +1157,10 @@ def edit_vendor_item():
                 elif negative_difference >= timedelta(seconds=1):
                     expires_in.append([f"This discount expires in {negative_difference.seconds}+ seconds(s).", i[3]])
 
-        return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year)
+        params = {"id":session["account_num"]}
+        images = db.execute(text("select image_id, image_url, items.item_id, users.user_id from images join items on (images.item_id = items.item_id) join users on (items.user_id = users.user_id) where users.user_id = :id"), params).all()
+
+        return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year, images=images)
     
     else:
         params = {"account_num":session["account_num"]}
@@ -1227,7 +1234,10 @@ def edit_vendor_item():
                 elif negative_difference >= timedelta(seconds=1):
                     expires_in.append([f"This discount expires in {negative_difference.seconds}+ seconds(s).", i[3]])
 
-        return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year)
+        params = {"id":session["account_num"]}
+        images = db.execute(text("select image_id, image_url, items.item_id, users.user_id from images join items on (images.item_id = items.item_id) join users on (items.user_id = users.user_id) where users.user_id = :id"), params).all()
+
+        return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year, images=images)
 
 
 @app.route("/vendor/order", methods=["GET", "POST"])
@@ -1549,6 +1559,37 @@ def clientside_chat(chat_id):
             return render_template("chat.html", formatted_messages=formatted_messages, other_user=other_user, chat_id=chat_id)
         else:
             return apology("You do not have access to this page.")
+        
+@app.route("/vendor_image/<image_id>", methods=["GET", "POST"])
+@login_required
+@vendor_page
+def image_editor(image_id):
+    if request.method == "POST":
+        new_link = request.form.get("new_img_link")
+        if new_link != "":
+            params = {"new_link":new_link, "id":image_id}
+            db.execute(text("update images set image_url = :new_link where image_id = :id"), params)
+            db.commit()
+
+        params = {"id":image_id}
+        images = db.execute(text("select image_id, image_url, items.item_id, users.user_id from images join items on (images.item_id = items.item_id) join users on (items.user_id = users.user_id) where image_id = :id"), params).all()
+        return render_template("item_image.html", images=images)
+    
+    else:
+        
+        params = {"id":image_id}
+        images = db.execute(text("select image_id, image_url, items.item_id, users.user_id from images join items on (images.item_id = items.item_id) join users on (items.user_id = users.user_id) where image_id = :id"), params).all()
+        return render_template("item_image.html", images=images)
+
+@app.route("/vendor_del_image/<image_id>")
+@login_required
+@vendor_page
+def remove_image(image_id):
+    params = {"id":image_id}
+    db.execute(text("delete from images where image_id = :id"), params)
+    db.commit()
+    return redirect("/vendor/edit")
+
 
 def apology(message, code=400):
     def escape(s):

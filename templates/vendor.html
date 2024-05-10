@@ -12,10 +12,8 @@
 
     {% for i in range(products|length) %}
         <div class="shop-items-0">
-            <!-- add items here with jinja -->
             <div class="shop-item">
                 <span class="shop-item-title">{{products[i][1]}}</span>
-                <!-- <img class="shop-item-image">  NEED IMAGES TABLE FIRST--> 
                 <div class="shop-item-details">
                     <span class="shop-item-price">{{"${:,.2f}".format(products[i][2] - (products[i][2] * (discounts[i][2]/100)))}}</span>
                 </div>
