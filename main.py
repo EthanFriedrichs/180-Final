@@ -101,7 +101,10 @@ def main_page():
 
         for i in random_items:
             params = {"id":i[0]}
-            random_images.append([db.execute(text("select * from images where item_id = :id"), params).all()[0][1], i[0]])
+            if len(db.execute(text("select * from images where item_id = :id"), params).all()) > 0:
+                random_images.append([db.execute(text("select * from images where item_id = :id"), params).all()[0][1], i[0]])
+            else:
+                warning = "Uh oh! Something went wrong so no items are available."
         
     return render_template("index.html", random_images=random_images, warning=warning)
 
@@ -1622,8 +1625,8 @@ def search_chats():
 @app.route("/new_chat", methods=["GET", "POST"])
 @login_required
 def make_new_chat():
+    user_id = request.form.get("selected_user")
     if (user_id != "N/A"):
-        user_id = request.form.get("selected_user")
         params = {"id1":session["account_num"], "id2":user_id, "complaint":"No"}
         db.execute(text("insert into chat_room (user_one_id, user_two_id, is_complaint) values (:id1, :id2, :complaint)"), params)
         db.commit()
