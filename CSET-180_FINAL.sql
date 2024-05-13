@@ -100,6 +100,8 @@ create table chat_room (chat_id int primary key auto_increment, user_one_id int,
 select * from chat_room;
 insert into chat_room (user_one_id, user_two_id, is_complaint) values (2, 1, "No"), (3, 2, "No");
 
+select * from users where username like "%ebay%" and username <> "Ebay";
+
 drop table messages;
 create table messages (message_id int primary key auto_increment, message varchar(255), sender_id int, time_sent datetime, chat_id int,
 foreign key (sender_id) references users(user_id),
