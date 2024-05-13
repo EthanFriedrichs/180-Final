@@ -811,7 +811,9 @@ def admin_edit():
                 elif negative_difference >= timedelta(seconds=1):
                     expires_in.append([f"This discount expires in {negative_difference.seconds}+ seconds(s).", i[3]])
 
-        return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year)
+        images = db.execute(text("select image_id, image_url, items.item_id, users.user_id from images join items on (images.item_id = items.item_id) join users on (items.user_id = users.user_id)")).all()
+
+        return render_template("edit_item.html", items=items, describers=describers, discounts=formatted_discounts, expires_in=expires_in, ct_year=ct_year, images=images)
     
     else:
         items = db.execute(text("select * from items")).all()
@@ -1695,7 +1697,6 @@ def clientside_chat(chat_id):
         
 @app.route("/vendor_image/<image_id>", methods=["GET", "POST"])
 @login_required
-@vendor_page
 def image_editor(image_id):
     if request.method == "POST":
         new_link = request.form.get("new_img_link")
@@ -1725,7 +1726,6 @@ def remove_image(image_id):
 
 @app.route("/vendor_new_image/<item_id>")
 @login_required
-@vendor_page
 def make_new_image(item_id):
     params = {"url":"None", "id":item_id}
     db.execute(text("insert into images (image_url, item_id) values (:url, :id)"), params)
