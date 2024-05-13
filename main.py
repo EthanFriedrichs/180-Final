@@ -1618,12 +1618,15 @@ def search_chats():
 @app.route("/new_chat", methods=["GET", "POST"])
 @login_required
 def make_new_chat():
-    user_id = request.form.get("selected_user")
-    params = {"id1":session["account_num"], "id2":user_id, "complaint":"No"}
-    db.execute(text("insert into chat_room (user_one_id, user_two_id, is_complaint) values (:id1, :id2, :complaint)"), params)
-    db.commit()
-    chat_id = db.execute(text("select * from chat_room order by chat_id desc")).all()[0][0]
-    return redirect("/chat/" + str(chat_id))
+    if (user_id != "N/A"):
+        user_id = request.form.get("selected_user")
+        params = {"id1":session["account_num"], "id2":user_id, "complaint":"No"}
+        db.execute(text("insert into chat_room (user_one_id, user_two_id, is_complaint) values (:id1, :id2, :complaint)"), params)
+        db.commit()
+        chat_id = db.execute(text("select * from chat_room order by chat_id desc")).all()[0][0]
+        return redirect("/chat/" + str(chat_id))
+    else:
+        return apology("Invalid user selected.")
 
 @app.route("/chat/<chat_id>", methods=["GET", "POST"])
 @login_required
