@@ -1,5 +1,6 @@
 create database customers_2;
 use customers_2;
+drop database customers_2;
 
 -- Admin will be hard coded in
 drop table users;
@@ -18,16 +19,16 @@ foreign key (user_id) references users(user_id));
 select * from items;
 select max(item_id) from items;
 insert into items (item_name, price, in_stock, user_id, warranty_length, descript) values 
-("example item A", 1.50, 20, 2, 365, "Item A"),
-("example item B", 3.00, 12, 2, 11, "Item B"),
-("example item C", 12.75, 5, 2, 240, "Item C");
+("Computer", 149.99, 20, 2, 365, "A very fast a reliable computer."),
+("T-Shirt", 12.99, 12, 2, 10, "A fluffy shirt made of 100% cotton."),
+("Chair", 56.99, 5, 2, 240, "A hardwood chair made of oak wood from the forests on Pandora.");
 select * from items where item_name like "%ebay%";
 
 
 drop tables describer;
 create table describer (color_id int primary key auto_increment, size varchar(255), color varchar(255), category varchar(255), item_id int,
 foreign key (item_id) references items(item_id));
-insert into describer (size, color, category, item_id) values ("Other", "N/A", "Plants", 3);
+insert into describer (size, color, category, item_id) values ("N/A", "Brown", "Furniture", 3);
 update describer set item_id = 4 where item_id = 1;
 select * from describer;
 delete from describer where color_id between 7 and 12;
@@ -38,10 +39,7 @@ create table images (image_id int primary key auto_increment, image_url varchar(
 foreign key (item_id) references items(item_id));
 select * from images;
 insert into images (image_url, item_id) values 
-("https://www.thoughtco.com/thmb/6lHWjbEdFPmSU1loT4lNAWQ_n9Y=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/Copper_sulfate-58a3b2ec3df78c47587b6212.jpg", 1),
-("https://pestell.com/wp-content/uploads/2015/05/fertilizer-nutrients-copper-sulphate-10XL-granular.jpg", 1),
-("https://m.media-amazon.com/images/I/41fz64v8U6L.jpg", 1),
-("https://camachem.com/pub/media/wysiwyg/Copper_Sulfate_Pentahydrate_01.png", 1);
+("https://m.media-amazon.com/images/I/51ulmT3YUZL._AC_UY1000_.jpg", 2);
 
 select image_id, image_url, items.item_id, users.user_id from images join items on (images.item_id = items.item_id) join users on (items.user_id = users.user_id) where users.user_id = 2;
 
@@ -89,7 +87,7 @@ drop table discounts;
 create table discounts (discount_id int primary key auto_increment, discount_expire datetime not null, discount_percent int not null, item_id int,
 foreign key (item_id) references items(item_id));
 select * from discounts;
-insert into discounts (discount_expire, discount_percent, item_id) values (now(), 20, 2);
+insert into discounts (discount_expire, discount_percent, item_id) values (now(), 20, 3);
 select discount_id, discount_expire, discount_percent, discounts.item_id from discounts join items on (discounts.item_id = items.item_id) where user_id = 2;
 update discounts set discount_expire = "DATE" where item_id = 2;
 
