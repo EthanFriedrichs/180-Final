@@ -76,7 +76,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection string is in the format mysql://user:password@server/database
-conn_str = "mysql://root:Just5fun!@localhost/customers_2"
+conn_str = "mysql://root:ethanpoe125@localhost/customers_2"
 engine = create_engine(conn_str) # echo=True tells you if connection is successful or not
 db = engine.connect()
 
@@ -94,12 +94,14 @@ def main_page():
     random_items = []
     random_images = []
 
-    for i in random_numbers:
-        random_items.append(items[i])
+    if (len(items) > 0):
 
-    for i in random_items:
-        params = {"id":i[0]}
-        random_images.append([db.execute(text("select * from images where item_id = :id"), params).all()[0][1], i[0]])
+        for i in random_numbers:
+            random_items.append(items[i])
+
+        for i in random_items:
+            params = {"id":i[0]}
+            random_images.append([db.execute(text("select * from images where item_id = :id"), params).all()[0][1], i[0]])
         
     return render_template("index.html", random_images=random_images, warning=warning)
 
