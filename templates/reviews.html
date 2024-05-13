@@ -11,7 +11,7 @@
 <link rel="stylesheet" href = "../statc/view.css">
 
 <section class="container content-section">
-    {%if products != "None"%}
+    {%if products != "None" or products|length>0 %}
         {%for product in products %}
             <form action="/reviews" method="post">
                 <h1>{{product[1]}}</h1>

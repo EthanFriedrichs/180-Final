@@ -76,13 +76,12 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection string is in the format mysql://user:password@server/database
-conn_str = "mysql://root:ethanpoe125@localhost/customers_2"
+conn_str = "mysql://root:Just5fun!@localhost/customers_2"
 engine = create_engine(conn_str) # echo=True tells you if connection is successful or not
 db = engine.connect()
 
 
 @app.route("/")
-@login_required
 def main_page():
     warning = ""
     items = db.execute(text("select * from items")).all()
@@ -199,7 +198,7 @@ def login():
 @app.route("/logout", methods=["GET"])
 def logout():
     session.clear()
-    return redirect("/login")
+    return redirect("/")
 
 #account routes
 @app.route("/my_account", methods=["Get", "POST"])
@@ -398,7 +397,10 @@ def item_page(item_id):
             params = {"user_id":user_id, "item_id":item_id, "color_id":variation, "quantity":quanitity}
             in_cart = db.execute(text("select * from cart where user_id = :user_id and item_id = :item_id and color_id = :color_id"), params).all()
             if len(in_cart) > 0:
-                quanitity = in_cart[0][3] + quanitity
+                print(quanitity)
+                print(in_cart)
+                print(in_cart[0][3])
+                quanitity = in_cart[0][3] + int(quanitity)
                 params = {"user_id":user_id, "item_id":item_id, "quant":quanitity, "color_id":variation}
                 db.execute(text("update cart set quantity = :quant where user_id = :user_id and item_id = :item_id and color_id = :color_id"), params)
                 db.commit()
@@ -1594,7 +1596,7 @@ def search_chats():
             else:
                 params = {"id1":i[2], "id2":i[1]}
                 chat_users.append([i[0], db.execute(text("select username from users where user_id = :id1"), params).all()[0][0], db.execute(text("select username from users where user_id = :id2"), params).all()[0][0]])
-
+        print(chat_users)
         return render_template("current_chats.html", chat_users=chat_users)
 
 @app.route("/chat/<chat_id>", methods=["GET", "POST"])

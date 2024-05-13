@@ -9,23 +9,31 @@
 <link rel="stylesheet" href="../static/view.css">
 
 <section class="container content-section">
-    {% for address in addresses %}
-        <div class="shop-items-0">
-            <div class="shop-item">
-                <span class="shop-item-title">{{address[5]}}, {{address[6]}}</span>
-                <span class="shop-item-title">{{address[7]}}, {{address[8]}}, {{address[9]}}</span>
-                <div class="shop-item-details">
-                    <p class="shop-item-info">Default Address: {{address[2]}}</p>
-                </div>
-                <div class="shop-item-details">
-                    <p class="shop-item-info">Reciever: {{address[3]}}</p>
-                </div>
-                <div class="shop-item-details">
-                    <p class="shop-item-info">Contact Number: {{address[4]}}</p>
+    {% if addresses|length > 0 %}
+        {% for address in addresses %}
+            <div class="shop-items-0">
+                <div class="shop-item">
+                    <span class="shop-item-title">{{address[5]}}, {{address[6]}}</span>
+                    <span class="shop-item-title">{{address[7]}}, {{address[8]}}, {{address[9]}}</span>
+                    <div class="shop-item-details">
+                        <p class="shop-item-info">Default Address: {{address[2]}}</p>
+                    </div>
+                    <div class="shop-item-details">
+                        <p class="shop-item-info">Reciever: {{address[3]}}</p>
+                    </div>
+                    <div class="shop-item-details">
+                        <p class="shop-item-info">Contact Number: {{address[4]}}</p>
+                    </div>
                 </div>
             </div>
+        {% endfor %}
+    {% else %}
+        <div class="shop-items-0">
+            <div class="shop-item">
+                <span class="shop-item-title">You have no saved addresses</span>
+            </div>
         </div>
-    {% endfor %}
+    {% endif %} 
 </section>
 <br>
 {% endblock %}
