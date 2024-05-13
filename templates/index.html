@@ -5,5 +5,22 @@
 {% endblock %}
 
 {% block body %}
-    <h1>this is home screen</h1>
+<br><br>
+    <div style="min-height: 75vh; display:flex; align-items:center">
+        <div class="container py-5 text-center">    
+            <h1>Welcome to Banky Commerce</h1>
+            <hr>
+            <h2>Check out some popular items!</h2>
+            <h3>{{warning}}</h3>
+            <div class="centered-div">
+                <div class="block-img-container">
+                    {%for i in random_images%}
+                        <div class="mini-div-alt">
+                            <a href="/item/{{i[1]}}"><img src="{{i[0]}}" alt=""></a>
+                        </div>
+                    {%endfor%}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

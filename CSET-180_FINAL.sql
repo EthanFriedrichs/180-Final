@@ -43,6 +43,8 @@ insert into images (image_url, item_id) values
 ("https://m.media-amazon.com/images/I/41fz64v8U6L.jpg", 1),
 ("https://camachem.com/pub/media/wysiwyg/Copper_Sulfate_Pentahydrate_01.png", 1);
 
+select * from images order by image_id desc;
+
 select image_id, image_url, items.item_id, users.user_id from images join items on (images.item_id = items.item_id) join users on (items.user_id = users.user_id) where users.user_id = 2;
 
 drop table cart;
