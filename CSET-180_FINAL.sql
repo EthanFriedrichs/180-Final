@@ -39,7 +39,7 @@ create table images (image_id int primary key auto_increment, image_url varchar(
 foreign key (item_id) references items(item_id));
 select * from images;
 insert into images (image_url, item_id) values 
-("https://m.media-amazon.com/images/I/51ulmT3YUZL._AC_UY1000_.jpg", 2);
+("https://www.worthingtondirect.com/media/catalog/product/4/4/4400.jpg?quality=80&bg-color=255,255,255&fit=bounds&height=&width=&canvas=:", 3);
 
 select * from images order by image_id desc;
 
