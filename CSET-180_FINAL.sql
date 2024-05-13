@@ -41,6 +41,7 @@ select * from images;
 insert into images (image_url, item_id) values 
 ("https://www.worthingtondirect.com/media/catalog/product/4/4/4400.jpg?quality=80&bg-color=255,255,255&fit=bounds&height=&width=&canvas=:", 3);
 
+
 select * from images order by image_id desc;
 
 select image_id, image_url, items.item_id, users.user_id from images join items on (images.item_id = items.item_id) join users on (items.user_id = users.user_id) where users.user_id = 2;
@@ -97,6 +98,8 @@ drop table chat_room;
 create table chat_room (chat_id int primary key auto_increment, user_one_id int, user_two_id int, is_complaint varchar(5) not null);
 select * from chat_room;
 insert into chat_room (user_one_id, user_two_id, is_complaint) values (2, 1, "No"), (3, 2, "No");
+
+select * from users where username like "%ebay%" and username <> "Ebay";
 
 drop table messages;
 create table messages (message_id int primary key auto_increment, message varchar(255), sender_id int, time_sent datetime, chat_id int,

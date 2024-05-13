@@ -14,11 +14,13 @@
             <h3>{{warning}}</h3>
             <div class="centered-div">
                 <div class="block-img-container">
-                    {%for i in random_images%}
-                        <div class="mini-div-alt">
-                            <a href="/item/{{i[1]}}"><img src="{{i[0]}}" alt=""></a>
-                        </div>
-                    {%endfor%}
+                    {%if random_images != "NONE"%}
+                        {%for i in random_images%}
+                            <div class="mini-div-alt">
+                                <a href="/item/{{i[1]}}"><img src="{{i[0]}}" alt=""></a>
+                            </div>
+                        {%endfor%}
+                    {%endif%}
                 </div>
             </div>
         </div>

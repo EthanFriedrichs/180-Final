@@ -76,7 +76,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection string is in the format mysql://user:password@server/database
-conn_str = "mysql://root:Just5fun!@localhost/customers_2"
+conn_str = "mysql://root:ethanpoe125@localhost/customers_2"
 engine = create_engine(conn_str) # echo=True tells you if connection is successful or not
 db = engine.connect()
 
@@ -94,12 +94,17 @@ def main_page():
     random_items = []
     random_images = []
 
-    for i in random_numbers:
-        random_items.append(items[i])
+    if (len(items) > 0):
 
-    for i in random_items:
-        params = {"id":i[0]}
-        random_images.append([db.execute(text("select * from images where item_id = :id"), params).all()[0][1], i[0]])
+        for i in random_numbers:
+            random_items.append(items[i])
+
+        for i in random_items:
+            params = {"id":i[0]}
+            if len(db.execute(text("select * from images where item_id = :id"), params).all()) > 0:
+                random_images.append([db.execute(text("select * from images where item_id = :id"), params).all()[0][1], i[0]])
+            else:
+                warning = "Uh oh! Something went wrong so no items are available."
         
     return render_template("index.html", random_images=random_images, warning=warning)
 
@@ -492,6 +497,7 @@ def admin_add():
         desc = request.form.get("desc")
         price = request.form.get("item_price")
         stock = request.form.get("curr_stock")
+        image = request.form.get("image_link")
         warranty = request.form.get("warranty_length")
         color = request.form.getlist("color")
         size = request.form.getlist("size")
@@ -507,6 +513,10 @@ def admin_add():
 
             params = {"name":name, "price":price, "stock":stock, "user":request.form.get("vendor"), "warranty":warranty, "desc":desc}
             db.execute(text("insert into items (item_name, price, in_stock, user_id, warranty_length, descript) values (:name, :price, :stock, :user, :warranty, :desc)"), params)
+            db.commit()
+            item_id = db.execute(text("select item_id from items order by item_id desc")).all()[0][0]
+            params = {"image":image, "item_id":item_id}
+            db.execute(text("insert into images (image_url, item_id) values (:image, :item_id)"), params)
             db.commit()
 
             curr_items = db.execute(text("select max(item_id) from items")).all()
@@ -893,6 +903,7 @@ def add_item():
         desc = request.form.get("desc")
         price = request.form.get("item_price")
         stock = request.form.get("curr_stock")
+        image = request.form.get("image_link")
         warranty = request.form.get("warranty_length")
         category = request.form.get("category")
         color = request.form.getlist("color")
@@ -909,6 +920,10 @@ def add_item():
 
             params = {"name":name, "price":price, "stock":stock, "user":user[0][0], "warranty":warranty, "desc":desc}
             db.execute(text("insert into items (item_name, price, in_stock, user_id, warranty_length, descript) values (:name, :price, :stock, :user, :warranty, :desc)"), params)
+            db.commit()
+            item_id = db.execute(text("select item_id from items order by item_id desc")).all()[0][0]
+            params = {"image":image, "item_id":item_id}
+            db.execute(text("insert into images (image_url, item_id) values (:image, :item_id)"), params)
             db.commit()
 
             curr_items = db.execute(text("select max(item_id) from items")).all()
@@ -1582,7 +1597,25 @@ def vendor_complaints():
 @login_required
 def search_chats():
     if request.method == "POST":
-        return render_template("chats.html")
+        user_searched = request.form.get("user_search")
+        params = {"id":session["account_num"]}
+        current_rooms = db.execute(text("select * from chat_room where user_one_id = :id or user_two_id = :id"), params).all()
+        
+        chat_users = []
+        for i in current_rooms:
+            if (i[1] == session["account_num"]):
+                params = {"id1":i[1], "id2":i[2]}
+                chat_users.append([i[0], db.execute(text("select username from users where user_id = :id1"), params).all()[0][0], db.execute(text("select username from users where user_id = :id2"), params).all()[0][0]])
+
+            else:
+                params = {"id1":i[2], "id2":i[1]}
+                chat_users.append([i[0], db.execute(text("select username from users where user_id = :id1"), params).all()[0][0], db.execute(text("select username from users where user_id = :id2"), params).all()[0][0]])
+
+        if (user_searched != ""):
+            params = {"user":'%' + user_searched + '%', "id":session["account_num"]}
+            searched_users = db.execute(text("select * from users where username like :user and user_id <> :id"), params).all()
+
+        return render_template("current_chats.html", chat_users=chat_users, searched_users=searched_users)
     
     else:
         params = {"id":session["account_num"]}
@@ -1599,6 +1632,19 @@ def search_chats():
                 chat_users.append([i[0], db.execute(text("select username from users where user_id = :id1"), params).all()[0][0], db.execute(text("select username from users where user_id = :id2"), params).all()[0][0]])
         print(chat_users)
         return render_template("current_chats.html", chat_users=chat_users)
+    
+@app.route("/new_chat", methods=["GET", "POST"])
+@login_required
+def make_new_chat():
+    user_id = request.form.get("selected_user")
+    if (user_id != "N/A"):
+        params = {"id1":session["account_num"], "id2":user_id, "complaint":"No"}
+        db.execute(text("insert into chat_room (user_one_id, user_two_id, is_complaint) values (:id1, :id2, :complaint)"), params)
+        db.commit()
+        chat_id = db.execute(text("select * from chat_room order by chat_id desc")).all()[0][0]
+        return redirect("/chat/" + str(chat_id))
+    else:
+        return apology("Invalid user selected.")
 
 @app.route("/chat/<chat_id>", methods=["GET", "POST"])
 @login_required
