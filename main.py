@@ -498,6 +498,7 @@ def admin_add():
         desc = request.form.get("desc")
         price = request.form.get("item_price")
         stock = request.form.get("curr_stock")
+        image = request.form.get("image_link")
         warranty = request.form.get("warranty_length")
         color = request.form.getlist("color")
         size = request.form.getlist("size")
@@ -513,6 +514,10 @@ def admin_add():
 
             params = {"name":name, "price":price, "stock":stock, "user":request.form.get("vendor"), "warranty":warranty, "desc":desc}
             db.execute(text("insert into items (item_name, price, in_stock, user_id, warranty_length, descript) values (:name, :price, :stock, :user, :warranty, :desc)"), params)
+            db.commit()
+            item_id = db.execute(text("select item_id from items order by item_id desc")).all()[0][0]
+            params = {"image":image, "item_id":item_id}
+            db.execute(text("insert into images (image_url, item_id) values (:image, :item_id)"), params)
             db.commit()
 
             curr_items = db.execute(text("select max(item_id) from items")).all()
@@ -898,6 +903,7 @@ def add_item():
         desc = request.form.get("desc")
         price = request.form.get("item_price")
         stock = request.form.get("curr_stock")
+        image = request.form.get("image_link")
         warranty = request.form.get("warranty_length")
         category = request.form.get("category")
         color = request.form.getlist("color")
@@ -914,6 +920,10 @@ def add_item():
 
             params = {"name":name, "price":price, "stock":stock, "user":user[0][0], "warranty":warranty, "desc":desc}
             db.execute(text("insert into items (item_name, price, in_stock, user_id, warranty_length, descript) values (:name, :price, :stock, :user, :warranty, :desc)"), params)
+            db.commit()
+            item_id = db.execute(text("select item_id from items order by item_id desc")).all()[0][0]
+            params = {"image":image, "item_id":item_id}
+            db.execute(text("insert into images (image_url, item_id) values (:image, :item_id)"), params)
             db.commit()
 
             curr_items = db.execute(text("select max(item_id) from items")).all()
