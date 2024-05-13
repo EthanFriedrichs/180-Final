@@ -4,6 +4,7 @@ from sqlalchemy import create_engine, text
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 from datetime import datetime, timedelta
+import random
 
 def login_required(
     f,
@@ -83,7 +84,25 @@ db = engine.connect()
 @app.route("/")
 @login_required
 def main_page():
-    return render_template("index.html")
+    warning = ""
+    items = db.execute(text("select * from items")).all()
+    if (len(items) > 6):
+        random_numbers = random.sample(range(len(items)), 6)
+    elif (len(items) > 0):
+        random_numbers = random.sample(range(len(items)), len(items))
+    else:
+        warning = "Uh oh! Something went wrong so no items are available."
+    random_items = []
+    random_images = []
+
+    for i in random_numbers:
+        random_items.append(items[i])
+
+    for i in random_items:
+        params = {"id":i[0]}
+        random_images.append([db.execute(text("select * from images where item_id = :id"), params).all()[0][1], i[0]])
+        
+    return render_template("index.html", random_images=random_images, warning=warning)
 
 
 @app.route("/register", methods=["GET", "POST"])

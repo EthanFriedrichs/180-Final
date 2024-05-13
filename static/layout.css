@@ -488,3 +488,39 @@ color:black;
 .spaced-div a:hover {
     box-shadow: rgb(147, 211, 232) 3px 3px 3px;
 }
+
+.block-img-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 80%;
+}
+
+.block-img-container a, img{
+    max-width: 300px;
+    max-height: 300px;
+}
+
+.block-img-container img{
+    border: solid black 2px;
+}
+
+.mini-div-alt {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    margin: 3px;
+    background-color: rgba(114, 178, 200, 0.7);
+    padding: 5px;
+    border: rgba(84, 130, 146, 0.7) solid 3px;
+}
+
+.centered-div {
+    display: flex;
+    justify-content: center;
+}
+
+hr {
+    border: black solid 20px;
+}
