@@ -13,6 +13,21 @@
                     <h3>Between you and {{i[2]}} <button class="final-btn" type="submit">View</button></h3>
                 </form>
             {%endfor%}
+            <div>
+                <form action="/chats" method="post" style="margin: 10px;">
+                <input type="text" class="form-control mx-auto m-auto" name="user_search" placeholder="Search for user">
+                <button class="final-btn" type="submit">Search for user</button>
+                </form>
+                <form action="/new_chat" method="post" style="margin: 10px;">
+                <select name="selected_user" class="add-select">
+                    <option selected value="%">N/A</option>
+                    {%for i in searched_users%}
+                    <option value="{{i[0]}}">{{i[2]}}</option>
+                    {%endfor%}
+                </select>
+                <button class="final-btn" type="submit">Start new chat</button>
+                </form>
+            </div>
         </div>
     </div>
 {% endblock %}

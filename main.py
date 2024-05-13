@@ -1581,7 +1581,25 @@ def vendor_complaints():
 @login_required
 def search_chats():
     if request.method == "POST":
-        return render_template("chats.html")
+        user_searched = request.form.get("user_search")
+        params = {"id":session["account_num"]}
+        current_rooms = db.execute(text("select * from chat_room where user_one_id = :id or user_two_id = :id"), params).all()
+        
+        chat_users = []
+        for i in current_rooms:
+            if (i[1] == session["account_num"]):
+                params = {"id1":i[1], "id2":i[2]}
+                chat_users.append([i[0], db.execute(text("select username from users where user_id = :id1"), params).all()[0][0], db.execute(text("select username from users where user_id = :id2"), params).all()[0][0]])
+
+            else:
+                params = {"id1":i[2], "id2":i[1]}
+                chat_users.append([i[0], db.execute(text("select username from users where user_id = :id1"), params).all()[0][0], db.execute(text("select username from users where user_id = :id2"), params).all()[0][0]])
+
+        if (user_searched != ""):
+            params = {"user":'%' + user_searched + '%', "id":session["account_num"]}
+            searched_users = db.execute(text("select * from users where username like :user and user_id <> :id"), params).all()
+
+        return render_template("current_chats.html", chat_users=chat_users, searched_users=searched_users)
     
     else:
         params = {"id":session["account_num"]}
@@ -1598,6 +1616,19 @@ def search_chats():
                 chat_users.append([i[0], db.execute(text("select username from users where user_id = :id1"), params).all()[0][0], db.execute(text("select username from users where user_id = :id2"), params).all()[0][0]])
         print(chat_users)
         return render_template("current_chats.html", chat_users=chat_users)
+    
+@app.route("/new_chat", methods=["GET", "POST"])
+@login_required
+def make_new_chat():
+    if (user_id != "N/A"):
+        user_id = request.form.get("selected_user")
+        params = {"id1":session["account_num"], "id2":user_id, "complaint":"No"}
+        db.execute(text("insert into chat_room (user_one_id, user_two_id, is_complaint) values (:id1, :id2, :complaint)"), params)
+        db.commit()
+        chat_id = db.execute(text("select * from chat_room order by chat_id desc")).all()[0][0]
+        return redirect("/chat/" + str(chat_id))
+    else:
+        return apology("Invalid user selected.")
 
 @app.route("/chat/<chat_id>", methods=["GET", "POST"])
 @login_required
