@@ -391,7 +391,6 @@ def view():
 
 @app.route("/item/<item_id>", methods=["GET", "POST"])
 @login_required
-@customer_page
 def item_page(item_id):
     if request.method == "POST":
         if not request.form.get("isFilter"):
@@ -580,11 +579,12 @@ def admin_delete():
     if request.method == "POST":
         product = request.form.get("product_id")
         params = {"product_id":product}
+        db.execute(text("delete from images where item_id = :product_id"), params)
+        db.execute(text("delete from order_items where item_id = :product_id"), params)
         db.execute(text("delete from describer where item_id = :product_id"), params)
         db.execute(text("delete from cart where item_id = :product_id"), params)
         db.execute(text("delete from complaints where item_id = :product_id"), params)
         db.execute(text("delete from reviews where item_id = :product_id"), params)
-        db.execute(text("delete from order_items where item_id = :product_id"), params)
         db.execute(text("delete from discounts where item_id = :product_id"), params)
         db.execute(text("delete from items where item_id = :product_id"), params)
         db.commit()
@@ -986,11 +986,12 @@ def vendor_delete():
     if request.method == "POST":
         product = request.form.get("product_id")
         params = {"product_id":product, "user_id":session["account_num"]}
+        db.execute(text("delete from images where item_id = :product_id"), params)
+        db.execute(text("delete from order_items where item_id = :product_id"), params)
         db.execute(text("delete from describer where item_id = :product_id"), params)
         db.execute(text("delete from cart where item_id = :product_id"), params)
         db.execute(text("delete from complaints where item_id = :product_id"), params)
         db.execute(text("delete from reviews where item_id = :product_id"), params)
-        db.execute(text("delete from order_items where item_id = :product_id"), params)
         db.execute(text("delete from discounts where item_id = :product_id"), params)
         db.execute(text("delete from items where item_id = :product_id"), params)
         db.commit()
@@ -1315,7 +1316,7 @@ def view_orders():
                 if order_info[6] == order[0]:
                     total += order_info[7] * order_info[8]
             totals.append(total)
-        totals.reverse()         
+        totals.reverse()    
         return render_template("order.html", orders=orders, order_info=order_infos, totals=totals)
     
     else:
@@ -1340,7 +1341,7 @@ def confirm_orders():
                 flag = False
         
         if flag:
-            db.execute(text("update orders set order_status = 'Confirmed'"))
+            db.execute(text("update orders set order_status = 'Confirmed' where order_id = :order_id"), params)
             db.commit()
 
        
@@ -1371,7 +1372,7 @@ def delivery_orders():
                 flag = False
         
         if flag:
-            db.execute(text("update orders set order_status = 'Handed to Delivery Partner'"))
+            db.execute(text("update orders set order_status = 'Handed to Delivery Partner' where order_id = :order_id"), params)
             db.commit()
 
        
@@ -1402,7 +1403,7 @@ def ship_orders():
                 flag = False
         
         if flag:
-            db.execute(text("update orders set order_status = 'Shipped'"))
+            db.execute(text("update orders set order_status = 'Shipped' where order_id = :order_id"), params)
             db.commit()
 
        
