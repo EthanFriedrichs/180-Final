@@ -184,7 +184,7 @@ def login():
                     session["username"] = user[2]
                     session["loggedIn"] = True
                     session["account_type"] = user[5]
-                    return render_template("index.html")
+                    return redirect("/")
             return apology("Wrong username and or password", 400)
 
         
@@ -196,7 +196,7 @@ def login():
             session["loggedIn"] = True
             session["account_type"] = users[0][5]
 
-            return render_template("index.html")
+            return redirect("/")
     else:
         return render_template("login.html")
 
@@ -366,19 +366,37 @@ def view():
         else:
             vendor = "%"
 
+        if request.form.get("category"):
+            category = request.form.get("category")
+        else:
+            category = "%"
+        if request.form.get("color"):
+            color = request.form.get("color")
+        else:
+            color = "%"
+        if request.form.get("size"):
+            size = request.form.get("size")
+        else:
+            size = "%"
+
 
         params = {"name":name, "description":description, "vendor":vendor}
         users = db.execute(text("select user_id from users where username like :vendor and user_type = 'Vendor'"), params).all()
         final_products = []
         #iterate over users, grab all their products and filter by other values as well
         for user in users:
-            params = {"name":name, "description":description, "vendor":vendor, "user_id":user[0]}
-            products = db.execute(text("select * from items where user_id = :user_id and item_name like :name and descript like :description order by user_id"), params).all()
+            params = {"name":name, "description":description, "vendor":vendor, "user_id":user[0], "size": size, "color":color, "category":category}
+            products = db.execute(text("select distinct * from items join describer on (items.item_id = describer.item_id) where user_id = :user_id and item_name like :name and descript like :description and category like :category and size like :size and color like :color order by user_id"), params).all()
             if products:
                 for product in products:
                     final_products.append(product)
         users = db.execute(text("select user_id, username from users")).all()
-        return render_template("view.html", products=final_products, users=users)
+        users = db.execute(text("select user_id, username from users")).all()
+        colors = db.execute(text("select distinct color from describer where color != 'N/A'")).all()
+        sizes = db.execute(text("select distinct size from describer where size != 'N/A'")).all()
+        categories = db.execute(text("select distinct category from describer where category != 'N/A'")).all()
+        discounts = db.execute(text("select * from discounts")).all()
+        return render_template("view.html", products=final_products, users=users, colors=colors, sizes=sizes, categories=categories, discounts=discounts)
     else:
         products = db.execute(text("select * from items order by user_id")).all()
         users = db.execute(text("select user_id, username from users")).all()
